@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("Salon LeHoang")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+ee036ed9c01d87615f086675cf4ff2c61702ea22")]
 [assembly: System.Reflection.AssemblyProductAttribute("Salon LeHoang")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Salon LeHoang")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

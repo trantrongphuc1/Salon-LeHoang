@@ -1,0 +1,113 @@
+@model Salon_LeHoang.Models.ViewModels.PayrollViewModel
+@{
+    ViewData["Title"] = "Bảng lương";
+}
+
+<div class="animate-in">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h4 class="fw-bold mb-0"><i class="bi bi-cash-stack me-2" style="color:var(--gold);"></i>Bảng lương tháng @Model.Month/@Model.Year</h4>
+        <button onclick="window.print();" class="btn btn-outline-gold no-print"><i class="bi bi-printer me-1"></i> In bảng lương</button>
+    </div>
+
+    <!-- Month/Year picker -->
+    <div class="card-custom mb-4 no-print">
+        <div class="card-body p-3">
+            <form method="get" class="d-flex gap-2 align-items-center flex-wrap">
+                <label class="form-label mb-0 me-1 fw-semibold">Tháng:</label>
+                <select name="month" class="form-select" style="width:auto;">
+                    @for (int m = 1; m <= 12; m++)
+                    {
+                        <option value="@m" selected="@(m == Model.Month)">Tháng @m</option>
+                    }
+                </select>
+                <select name="year" class="form-select" style="width:auto;">
+                    @for (int y = DateTime.Now.Year - 2; y <= DateTime.Now.Year + 1; y++)
+                    {
+                        <option value="@y" selected="@(y == Model.Year)">@y</option>
+                    }
+                </select>
+                <button type="submit" class="btn btn-outline-gold"><i class="bi bi-search me-1"></i>Xem</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="card-custom">
+        <div class="card-header">
+            <h6 class="mb-0 fw-semibold">
+                Bảng lương chi tiết — Tháng @Model.Month/@Model.Year
+            </h6>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-dark table-custom">
+                <thead>
+                    <tr>
+                        <th>Nhân viên</th>
+                        <th>Lương CB</th>
+                        <th>Ngày nghỉ</th>
+                        <th>Ngày vượt</th>
+                        <th>Lương theo công</th>
+                        <th>Doanh thu HĐ</th>
+                        <th>Hoa hồng (%)</th>
+                        <th>Tiền hoa hồng</th>
+                        <th class="fw-bold" style="color:var(--gold);">TỔNG LƯƠNG</th>
+                        <th class="text-end no-print">Chi tiết</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @{
+                        decimal grandTotal = 0;
+                    }
+                    @foreach (var item in Model.Items)
+                    {
+                        grandTotal += item.TotalSalary;
+                        <tr>
+                            <td class="fw-semibold">@item.Employee.FullName</td>
+                            <td>@String.Format("{0:N0}đ", item.Employee.BaseSalary)</td>
+                            <td>
+                                @item.DaysOff ngày
+                                @if (item.ExcessDaysOff > 0)
+                                {
+                                    <span class="badge badge-violation ms-1">Vi phạm</span>
+                                }
+                            </td>
+                            <td class="@(item.ExcessDaysOff > 0 ? "text-danger fw-bold" : "text-success")">
+                                @if (item.ExcessDaysOff > 0)
+                                {
+                                    @:@item.ExcessDaysOff ngày
+                                }
+                                else
+                                {
+                                    @:0
+                                }
+                            </td>
+                            <td class="fw-semibold">@String.Format("{0:N0}đ", item.BaseSalaryEarned)</td>
+                            <td>@String.Format("{0:N0}đ", item.TotalInvoiceAmount)</td>
+                            <td><span class="badge badge-gold">@item.Employee.CommissionRate%</span></td>
+                            <td class="text-info">@String.Format("{0:N0}đ", item.CommissionEarned)</td>
+                            <td class="fw-bold fs-6" style="color:var(--gold);">@String.Format("{0:N0}đ", item.TotalSalary)</td>
+                            <td class="text-end no-print">
+                                <a asp-action="PayrollDetail" asp-route-employeeId="@item.Employee.EmployeeId" asp-route-month="@Model.Month" asp-route-year="@Model.Year"
+                                   class="btn btn-sm btn-outline-gold"><i class="bi bi-eye"></i></a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+                <tfoot>
+                    <tr style="border-top:2px solid var(--gold);">
+                        <td colspan="8" class="fw-bold text-end">TỔNG CHI LƯƠNG:</td>
+                        <td class="fw-bold fs-5" style="color:var(--gold);">@String.Format("{0:N0}đ", grandTotal)</td>
+                        <td class="no-print"></td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+
+    <!-- Legend -->
+    <div class="mt-3 small text-muted no-print">
+        <p class="mb-1"><strong>Cách tính:</strong></p>
+        <p class="mb-1">• Công chuẩn: 28/30 ngày. Nghỉ ≤ 2 ngày = hưởng full lương cơ bản.</p>
+        <p class="mb-1">• Nghỉ > 2 ngày → Lương theo công = Lương CB ÷ 28 × (28 - số ngày vượt quá).</p>
+        <p class="mb-0">• Hoa hồng = Tổng doanh thu HĐ nhân viên thực hiện × % hoa hồng.</p>
+    </div>
+</div>

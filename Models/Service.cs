@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
 namespace Salon_LeHoang.Models;
@@ -22,4 +22,6 @@ public partial class Service
     public DateTime CreatedAt { get; set; }
 
     public virtual ICollection<AppointmentDetail> AppointmentDetails { get; set; } = new List<AppointmentDetail>();
+
+    public virtual ICollection<InvoiceDetail> InvoiceDetails { get; set; } = new List<InvoiceDetail>();
 }

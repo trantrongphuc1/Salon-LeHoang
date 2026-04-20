@@ -1,0 +1,202 @@
+@{
+    ViewData["Title"] = "Tạo hóa đơn";
+    var customers = ViewBag.Customers as List<Salon_LeHoang.Models.User>;
+    var services = ViewBag.Services as List<Salon_LeHoang.Models.Service>;
+    var employees = ViewBag.Employees as List<Salon_LeHoang.Models.Employee>;
+}
+
+<div class="animate-in">
+    <div class="d-flex align-items-center gap-2 mb-4">
+        <a asp-action="Index" class="btn btn-sm btn-outline-secondary"><i class="bi bi-arrow-left"></i></a>
+        <h4 class="fw-bold mb-0"><i class="bi bi-receipt me-2" style="color:var(--gold);"></i>Tạo hóa đơn mới</h4>
+    </div>
+
+    <form asp-action="Create" method="post" id="invoiceForm">
+        <div class="row g-4">
+            <!-- Left: Customer & Payment -->
+            <div class="col-md-4">
+                <div class="card-custom p-4 mb-4">
+                    <h6 class="fw-semibold mb-3" style="color:var(--gold);"><i class="bi bi-person me-2"></i>Khách hàng</h6>
+                    <div class="mb-3">
+                        <label class="form-label">Chọn khách hàng <span class="text-danger">*</span></label>
+                        <select name="customerId" id="customerSelect" class="form-select" required onchange="loadCustomerInfo()">
+                            <option value="">-- Chọn khách hàng --</option>
+                            @if (customers != null)
+                            {
+                                @foreach (var c in customers)
+                                {
+                                    <option value="@c.UserId" data-points="@c.Points" data-phone="@c.PhoneNumber">@c.FullName — @c.PhoneNumber</option>
+                                }
+                            }
+                        </select>
+                    </div>
+                    <div id="customerInfo" style="display:none;">
+                        <div class="p-3 rounded-3 mb-3" style="background:rgba(212,175,55,0.05);border:1px solid rgba(212,175,55,0.1);">
+                            <div class="small text-muted">Điểm hiện có:</div>
+                            <div class="fs-5 fw-bold" style="color:var(--gold);"><i class="bi bi-star-fill me-1"></i><span id="customerPoints">0</span> điểm</div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Dùng điểm (1 điểm = 1,000đ)</label>
+                            <input type="number" name="pointsToUse" id="pointsToUse" class="form-control" value="0" min="0" onchange="calcTotal()" />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-custom p-4">
+                    <h6 class="fw-semibold mb-3" style="color:var(--gold);"><i class="bi bi-credit-card me-2"></i>Thanh toán</h6>
+                    <div class="mb-3">
+                        <label class="form-label">Phương thức</label>
+                        <select name="paymentMethod" class="form-select">
+                            <option value="Tiền mặt">Tiền mặt</option>
+                            <option value="Chuyển khoản">Chuyển khoản</option>
+                            <option value="Thẻ">Thẻ</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Ghi chú</label>
+                        <textarea name="notes" class="form-control" rows="2" placeholder="Ghi chú thêm..."></textarea>
+                    </div>
+
+                    <!-- Total summary -->
+                    <div class="p-3 rounded-3" style="background:rgba(212,175,55,0.08);border:1px solid rgba(212,175,55,0.15);">
+                        <div class="d-flex justify-content-between mb-1">
+                            <span class="text-muted">Tổng cộng:</span>
+                            <span class="fw-semibold" id="totalDisplay">0đ</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-1" id="discountRow" style="display:none !important;">
+                            <span class="text-muted">Giảm (điểm):</span>
+                            <span class="text-danger" id="discountDisplay">0đ</span>
+                        </div>
+                        <hr style="border-color:var(--border-color);" class="my-2" />
+                        <div class="d-flex justify-content-between">
+                            <span class="fw-bold">Thành tiền:</span>
+                            <span class="fw-bold fs-5" style="color:var(--gold);" id="finalDisplay">0đ</span>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-gold w-100 mt-3 py-2"><i class="bi bi-check-circle me-1"></i> Thanh toán & Tạo HĐ</button>
+                </div>
+            </div>
+
+            <!-- Right: Service items -->
+            <div class="col-md-8">
+                <div class="card-custom">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h6 class="mb-0 fw-semibold"><i class="bi bi-stars me-2" style="color:var(--gold);"></i>Dịch vụ</h6>
+                        <button type="button" class="btn btn-sm btn-gold" onclick="addServiceRow()"><i class="bi bi-plus me-1"></i>Thêm dịch vụ</button>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-dark table-custom mb-0" id="serviceTable">
+                                <thead>
+                                    <tr>
+                                        <th style="width:35%;">Dịch vụ</th>
+                                        <th style="width:30%;">Nhân viên</th>
+                                        <th style="width:10%;">SL</th>
+                                        <th style="width:15%;">Thành tiền</th>
+                                        <th style="width:10%;"></th>
+                                    </tr>
+                                </thead>
+                                <tbody id="serviceBody">
+                                    <!-- Dynamic rows -->
+                                </tbody>
+                            </table>
+                        </div>
+                        <div id="emptyMessage" class="text-center py-4 text-muted">
+                            <i class="bi bi-plus-circle fs-3 d-block mb-2"></i>
+                            Nhấn "Thêm dịch vụ" để bắt đầu
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <script>
+        var servicesData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(services?.Select(s => new { s.ServiceId, s.ServiceName, s.Price })));
+        var employeesData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(employees?.Select(e => new { e.EmployeeId, e.FullName })));
+
+        function addServiceRow() {
+            document.getElementById('emptyMessage').style.display = 'none';
+            var tbody = document.getElementById('serviceBody');
+            var idx = tbody.children.length;
+
+            var serviceOptions = '<option value="">-- Chọn --</option>';
+            servicesData.forEach(s => {
+                serviceOptions += `<option value="${s.serviceId}" data-price="${s.price}">${s.serviceName} — ${Number(s.price).toLocaleString('vi-VN')}đ</option>`;
+            });
+
+            var empOptions = '<option value="">-- Chọn --</option>';
+            employeesData.forEach(e => {
+                empOptions += `<option value="${e.employeeId}">${e.fullName}</option>`;
+            });
+
+            var row = document.createElement('tr');
+            row.innerHTML = `
+                <td><select name="serviceIds" class="form-select form-select-sm service-select" required onchange="calcTotal()">${serviceOptions}</select></td>
+                <td><select name="employeeIds" class="form-select form-select-sm" required>${empOptions}</select></td>
+                <td><input type="number" name="quantities" class="form-control form-control-sm" value="1" min="1" onchange="calcTotal()" /></td>
+                <td class="fw-bold line-total" style="color:var(--gold);">0đ</td>
+                <td><button type="button" class="btn btn-sm btn-outline-danger" onclick="removeRow(this)"><i class="bi bi-trash"></i></button></td>
+            `;
+            tbody.appendChild(row);
+        }
+
+        function removeRow(btn) {
+            btn.closest('tr').remove();
+            calcTotal();
+            if (document.getElementById('serviceBody').children.length === 0) {
+                document.getElementById('emptyMessage').style.display = 'block';
+            }
+        }
+
+        function loadCustomerInfo() {
+            var sel = document.getElementById('customerSelect');
+            var opt = sel.options[sel.selectedIndex];
+            if (sel.value) {
+                document.getElementById('customerInfo').style.display = 'block';
+                document.getElementById('customerPoints').textContent = opt.getAttribute('data-points');
+                document.getElementById('pointsToUse').max = opt.getAttribute('data-points');
+            } else {
+                document.getElementById('customerInfo').style.display = 'none';
+            }
+            calcTotal();
+        }
+
+        function calcTotal() {
+            var total = 0;
+            document.querySelectorAll('#serviceBody tr').forEach(row => {
+                var sel = row.querySelector('.service-select');
+                var qty = parseInt(row.querySelector('input[name="quantities"]').value) || 1;
+                var price = 0;
+                if (sel.value) {
+                    price = parseFloat(sel.options[sel.selectedIndex].getAttribute('data-price')) || 0;
+                }
+                var lineTotal = price * qty;
+                total += lineTotal;
+                row.querySelector('.line-total').textContent = Number(lineTotal).toLocaleString('vi-VN') + 'đ';
+            });
+
+            var pointsToUse = parseInt(document.getElementById('pointsToUse').value) || 0;
+            var discount = pointsToUse * 1000;
+            if (discount > total) discount = total;
+            var final_ = total - discount;
+
+            document.getElementById('totalDisplay').textContent = Number(total).toLocaleString('vi-VN') + 'đ';
+            document.getElementById('finalDisplay').textContent = Number(final_).toLocaleString('vi-VN') + 'đ';
+
+            if (discount > 0) {
+                document.getElementById('discountRow').style.display = 'flex';
+                document.getElementById('discountRow').style.setProperty('display', 'flex', 'important');
+                document.getElementById('discountDisplay').textContent = '-' + Number(discount).toLocaleString('vi-VN') + 'đ';
+            } else {
+                document.getElementById('discountRow').style.setProperty('display', 'none', 'important');
+            }
+        }
+
+        // Add first row by default
+        addServiceRow();
+    </script>
+}

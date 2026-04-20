@@ -1,0 +1,361 @@
+@{ ViewData["Title"] = "POS"; Layout = null;
+var services = ViewBag.Services as List<Salon_LeHoang.Models.Service>;
+var employees = ViewBag.Employees as List<Salon_LeHoang.Models.Employee>;
+}
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>POS - Salon LeHoang</title>
+<link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css"/>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--gold:#d4af37;--bg:#0b0c10;--panel:#14151f;--card:#1c1d2b;--card-hover:#262738;--border:rgba(255,255,255,.06);--text:#e0e0e5;--muted:#7a7f8e;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);height:100vh;overflow:hidden;display:flex;flex-direction:column;}
+/* Top bar */
+.pos-topbar{background:var(--panel);border-bottom:1px solid var(--border);padding:.5rem 1rem;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.pos-topbar .brand{font-weight:700;color:var(--gold);font-size:1.1rem;}
+.pos-topbar .nav-links a{color:var(--muted);text-decoration:none;font-size:.85rem;margin-left:1rem;transition:.2s;}
+.pos-topbar .nav-links a:hover{color:var(--gold);}
+/* Main */
+.pos-main{flex:1;display:flex;overflow:hidden;}
+/* Left: services */
+.pos-left{flex:1;display:flex;flex-direction:column;border-right:1px solid var(--border);min-width:0;}
+.pos-search{padding:.6rem;border-bottom:1px solid var(--border);background:var(--panel);}
+.pos-search input{background:var(--bg);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:.45rem .75rem;width:100%;font-size:.85rem;}
+.pos-search input:focus{outline:none;border-color:var(--gold);}
+.svc-grid{flex:1;overflow-y:auto;padding:.6rem;display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:.5rem;align-content:start;}
+.svc-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:.75rem;cursor:pointer;transition:.2s;text-align:center;}
+.svc-card:hover{background:var(--card-hover);border-color:rgba(212,175,55,.25);transform:translateY(-1px);}
+.svc-card .svc-name{font-size:.8rem;font-weight:600;margin-bottom:.3rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.svc-card .svc-price{color:var(--gold);font-weight:700;font-size:.9rem;}
+.svc-card .svc-icon{font-size:1.5rem;color:var(--gold);margin-bottom:.3rem;}
+/* Right: order panel */
+.pos-right{width:420px;flex-shrink:0;display:flex;flex-direction:column;background:var(--panel);}
+/* Tabs */
+.order-tabs{display:flex;border-bottom:1px solid var(--border);background:rgba(0,0,0,.2);flex-shrink:0;overflow-x:auto;}
+.order-tab{padding:.5rem .85rem;font-size:.8rem;cursor:pointer;border-bottom:2px solid transparent;color:var(--muted);white-space:nowrap;display:flex;align-items:center;gap:.35rem;transition:.2s;}
+.order-tab.active{color:var(--gold);border-bottom-color:var(--gold);background:rgba(212,175,55,.05);}
+.order-tab .close-tab{font-size:.65rem;opacity:.5;margin-left:.25rem;cursor:pointer;}
+.order-tab .close-tab:hover{opacity:1;color:#ef4444;}
+.add-tab{padding:.5rem .75rem;color:var(--gold);cursor:pointer;font-size:.9rem;border-bottom:2px solid transparent;}
+.add-tab:hover{background:rgba(212,175,55,.05);}
+/* Customer */
+.cust-section{padding:.6rem;border-bottom:1px solid var(--border);flex-shrink:0;}
+.cust-search-wrap{position:relative;}
+.cust-results{position:absolute;top:100%;left:0;right:0;background:var(--card);border:1px solid var(--border);border-radius:0 0 8px 8px;max-height:180px;overflow-y:auto;z-index:10;display:none;}
+.cust-results.show{display:block;}
+.cust-item{padding:.45rem .65rem;cursor:pointer;font-size:.8rem;border-bottom:1px solid var(--border);transition:.15s;}
+.cust-item:hover{background:var(--card-hover);}
+.cust-selected{background:rgba(212,175,55,.08);border:1px solid rgba(212,175,55,.15);border-radius:8px;padding:.5rem .65rem;display:flex;justify-content:space-between;align-items:center;}
+.cust-selected .cust-name{font-weight:600;font-size:.85rem;}
+.cust-selected .cust-pts{color:var(--gold);font-size:.8rem;}
+/* Items */
+.order-items{flex:1;overflow-y:auto;padding:0;}
+.order-item{display:flex;align-items:center;gap:.5rem;padding:.55rem .65rem;border-bottom:1px solid var(--border);font-size:.8rem;}
+.order-item:hover{background:rgba(255,255,255,.02);}
+.order-item .item-remove{color:#ef4444;cursor:pointer;font-size:.85rem;flex-shrink:0;}
+.order-item .item-info{flex:1;min-width:0;}
+.order-item .item-name{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.order-item .item-emp{font-size:.7rem;color:var(--muted);}
+.order-item .item-qty{width:45px;}
+.order-item .item-qty input{background:var(--bg);border:1px solid var(--border);color:var(--text);border-radius:5px;width:100%;text-align:center;padding:2px;font-size:.8rem;}
+.order-item .item-total{font-weight:700;color:var(--gold);white-space:nowrap;min-width:70px;text-align:right;}
+/* Employee select in item */
+.order-item select{background:var(--bg);border:1px solid var(--border);color:var(--text);border-radius:5px;padding:2px 4px;font-size:.7rem;max-width:100px;}
+/* Footer */
+.order-footer{border-top:1px solid var(--border);padding:.65rem;flex-shrink:0;background:rgba(0,0,0,.15);}
+.total-row{display:flex;justify-content:space-between;margin-bottom:.25rem;font-size:.85rem;}
+.total-row.grand{font-size:1.15rem;font-weight:700;color:var(--gold);margin-top:.3rem;}
+.btn-pay{background:linear-gradient(135deg,var(--gold),#b8960c);color:#000;font-weight:700;border:none;border-radius:10px;padding:.7rem;width:100%;font-size:1rem;cursor:pointer;transition:.2s;margin-top:.5rem;}
+.btn-pay:hover{box-shadow:0 4px 20px rgba(212,175,55,.4);transform:translateY(-1px);}
+.btn-pay:disabled{opacity:.5;cursor:not-allowed;transform:none;box-shadow:none;}
+/* Modal */
+.modal-content{background:var(--panel);border:1px solid var(--border);color:var(--text);}
+.modal-header{border-bottom:1px solid var(--border);}
+.modal-footer{border-top:1px solid var(--border);}
+/* Scrollbar */
+::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:rgba(255,255,255,.1);border-radius:3px;}
+.empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;color:var(--muted);font-size:.85rem;}
+.empty-state i{font-size:2.5rem;margin-bottom:.5rem;opacity:.3;}
+</style>
+</head>
+<body>
+<!-- Top bar -->
+<div class="pos-topbar">
+    <div class="d-flex align-items-center gap-2">
+        <i class="bi bi-scissors" style="color:var(--gold);font-size:1.2rem;"></i>
+        <span class="brand">Salon LeHoang</span>
+    </div>
+    <div class="nav-links">
+        <a href="/Admin"><i class="bi bi-grid-1x2 me-1"></i>Dashboard</a>
+        <a href="/Service"><i class="bi bi-stars me-1"></i>Dịch vụ</a>
+        <a href="/Customer"><i class="bi bi-people me-1"></i>Khách hàng</a>
+        <a href="/Employee"><i class="bi bi-person-badge me-1"></i>Nhân viên</a>
+        <a href="/Invoice"><i class="bi bi-receipt me-1"></i>Hóa đơn</a>
+        <a href="/Employee/Payroll"><i class="bi bi-cash-stack me-1"></i>Bảng lương</a>
+        <a href="/Auth/Logout" class="text-danger"><i class="bi bi-box-arrow-left me-1"></i>Thoát</a>
+    </div>
+</div>
+
+<div class="pos-main">
+<!-- LEFT: Service catalog -->
+<div class="pos-left">
+    <div class="pos-search">
+        <input type="text" id="svcSearch" placeholder="🔍 Tìm dịch vụ..."/>
+    </div>
+    <div class="svc-grid" id="svcGrid">
+        @if(services != null){
+            @foreach(var s in services){
+                <div class="svc-card" onclick="addToOrder(@s.ServiceId)" data-name="@s.ServiceName.ToLower()">
+                    <div class="svc-icon"><i class="bi bi-scissors"></i></div>
+                    <div class="svc-name" title="@s.ServiceName">@s.ServiceName</div>
+                    <div class="svc-price">@String.Format("{0:N0}",s.Price)đ</div>
+                </div>
+            }
+        }
+    </div>
+</div>
+
+<!-- RIGHT: Order panel -->
+<div class="pos-right">
+    <!-- Order tabs -->
+    <div class="order-tabs" id="orderTabs">
+        <div class="order-tab active" data-idx="0">
+            <i class="bi bi-receipt-cutoff"></i> HĐ 1
+        </div>
+        <div class="add-tab" onclick="addNewOrder()" title="Thêm hóa đơn tạm"><i class="bi bi-plus-lg"></i></div>
+    </div>
+
+    <!-- Customer section -->
+    <div class="cust-section">
+        <div class="cust-search-wrap">
+            <input type="text" class="form-control form-control-sm" id="custSearch" placeholder="🔍 Tìm khách hàng (SĐT/Tên)..." style="background:var(--bg);border-color:var(--border);color:var(--text);border-radius:8px;font-size:.8rem;" autocomplete="off"/>
+            <div class="cust-results" id="custResults"></div>
+        </div>
+        <div id="custSelected" style="display:none;margin-top:.4rem;">
+            <div class="cust-selected">
+                <div><span class="cust-name" id="custName"></span><br><small class="text-muted" id="custPhone"></small></div>
+                <div class="d-flex align-items-center gap-2">
+                    <span class="cust-pts"><i class="bi bi-star-fill"></i> <span id="custPoints">0</span> điểm</span>
+                    <span class="text-danger" style="cursor:pointer;font-size:.75rem;" onclick="clearCustomer()"><i class="bi bi-x-circle"></i></span>
+                </div>
+            </div>
+        </div>
+        <div id="custNotFound" style="display:none;margin-top:.4rem;">
+            <div class="d-flex gap-1">
+                <input type="text" id="newCustName" class="form-control form-control-sm" placeholder="Tên" style="background:var(--bg);border-color:var(--border);color:var(--text);font-size:.75rem;"/>
+                <input type="text" id="newCustPhone" class="form-control form-control-sm" placeholder="SĐT" style="background:var(--bg);border-color:var(--border);color:var(--text);font-size:.75rem;width:110px;"/>
+                <button class="btn btn-sm" onclick="quickAddCustomer()" style="background:var(--gold);color:#000;font-size:.7rem;white-space:nowrap;">+ Thêm</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Order items -->
+    <div class="order-items" id="orderItems">
+        <div class="empty-state" id="emptyOrder"><i class="bi bi-cart3"></i>Chọn dịch vụ bên trái</div>
+    </div>
+
+    <!-- Footer / totals -->
+    <div class="order-footer">
+        <div class="total-row"><span>Tổng cộng:</span><span id="totalAmount">0đ</span></div>
+        <div class="total-row" id="discountRow" style="display:none;"><span>Giảm (điểm):</span><span class="text-danger" id="discountAmount">0đ</span></div>
+        <div class="total-row grand"><span>Thanh toán:</span><span id="finalAmount">0đ</span></div>
+        <div class="d-flex gap-2 mt-2">
+            <select id="payMethod" class="form-select form-select-sm" style="background:var(--bg);border-color:var(--border);color:var(--text);font-size:.8rem;width:auto;">
+                <option>Tiền mặt</option><option>Chuyển khoản</option><option>Thẻ</option>
+            </select>
+            <input type="number" id="pointsUse" class="form-control form-control-sm" placeholder="Dùng điểm" min="0" value="0" style="background:var(--bg);border-color:var(--border);color:var(--text);font-size:.8rem;width:90px;" onchange="calcTotal()"/>
+        </div>
+        <button class="btn-pay" id="btnPay" onclick="doCheckout()" disabled><i class="bi bi-cash-coin me-1"></i>Thanh toán</button>
+    </div>
+</div>
+</div>
+
+<!-- Payment success modal -->
+<div class="modal fade" id="successModal" tabindex="-1"><div class="modal-dialog modal-dialog-centered">
+<div class="modal-content"><div class="modal-header"><h6 class="modal-title fw-bold" style="color:var(--gold);"><i class="bi bi-check-circle-fill me-2"></i>Thanh toán thành công!</h6></div>
+<div class="modal-body text-center">
+    <div class="fs-4 fw-bold mb-2" style="color:var(--gold);" id="modalAmount"></div>
+    <p class="text-muted small mb-1">Mã HĐ: <strong id="modalInvoiceId"></strong></p>
+    <p class="text-muted small">Khách được cộng <strong class="text-success" id="modalPoints"></strong> điểm</p>
+</div>
+<div class="modal-footer justify-content-center">
+    <a id="modalPrintBtn" href="#" target="_blank" class="btn btn-sm" style="background:var(--gold);color:#000;"><i class="bi bi-printer me-1"></i>In hóa đơn</a>
+    <button class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal" onclick="afterPayment()">Đóng</button>
+</div></div></div></div>
+
+<script src="~/lib/jquery/dist/jquery.min.js"></script>
+<script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+var SERVICES = {};
+@if(services!=null){foreach(var s in services){@:SERVICES[@s.ServiceId]={id:@s.ServiceId,name:"@Html.Raw(s.ServiceName.Replace("\"","\\\""))",price:@s.Price};
+}}
+var EMPLOYEES = [];
+@if(employees!=null){foreach(var e in employees){@:EMPLOYEES.push({id:@e.EmployeeId,name:"@Html.Raw(e.FullName.Replace("\"","\\\""))"});
+}}
+
+// Orders state: array of {items:[], customerId, customerName, customerPhone, customerPoints}
+var orders = [{items:[],customerId:0,customerName:'',customerPhone:'',customerPoints:0}];
+var currentOrder = 0;
+var orderCounter = 1;
+
+function empOptions(){
+    var h='<option value="0">-- NV --</option>';
+    EMPLOYEES.forEach(e=>{h+=`<option value="${e.id}">${e.name}</option>`;});
+    return h;
+}
+
+function addToOrder(svcId){
+    var svc = SERVICES[svcId]; if(!svc) return;
+    var o = orders[currentOrder];
+    var existing = o.items.find(i=>i.serviceId===svcId);
+    if(existing){existing.qty++;} else {o.items.push({serviceId:svcId,name:svc.name,price:svc.price,qty:1,employeeId:0});}
+    renderOrder();
+}
+
+function renderOrder(){
+    var o = orders[currentOrder];
+    var el = document.getElementById('orderItems');
+    if(!o.items.length){el.innerHTML='<div class="empty-state" id="emptyOrder"><i class="bi bi-cart3"></i>Chọn dịch vụ bên trái</div>';calcTotal();return;}
+    var h='';
+    o.items.forEach((item,i)=>{
+        h+=`<div class="order-item">
+            <span class="item-remove" onclick="removeItem(${i})"><i class="bi bi-x"></i></span>
+            <div class="item-info"><div class="item-name">${item.name}</div>
+            <select onchange="setEmp(${i},this.value)" class="mt-1">${empOptions().replace('value="'+item.employeeId+'"','value="'+item.employeeId+'" selected')}</select></div>
+            <div class="item-qty"><input type="number" value="${item.qty}" min="1" onchange="setQty(${i},this.value)"/></div>
+            <div class="item-total">${(item.price*item.qty).toLocaleString('vi-VN')}đ</div></div>`;
+    });
+    el.innerHTML=h;calcTotal();
+}
+
+function removeItem(i){orders[currentOrder].items.splice(i,1);renderOrder();}
+function setQty(i,v){orders[currentOrder].items[i].qty=Math.max(1,parseInt(v)||1);renderOrder();}
+function setEmp(i,v){orders[currentOrder].items[i].employeeId=parseInt(v);}
+
+function calcTotal(){
+    var o=orders[currentOrder];
+    var total=o.items.reduce((s,i)=>s+i.price*i.qty,0);
+    var pts=parseInt(document.getElementById('pointsUse').value)||0;
+    var maxPts=o.customerPoints||0;
+    if(pts>maxPts)pts=maxPts;
+    var disc=pts*1000;if(disc>total)disc=total;
+    var final_=total-disc;
+    document.getElementById('totalAmount').textContent=total.toLocaleString('vi-VN')+'đ';
+    document.getElementById('finalAmount').textContent=final_.toLocaleString('vi-VN')+'đ';
+    if(disc>0){document.getElementById('discountRow').style.display='flex';document.getElementById('discountAmount').textContent='-'+disc.toLocaleString('vi-VN')+'đ';}
+    else{document.getElementById('discountRow').style.display='none';}
+    document.getElementById('btnPay').disabled=!(o.customerId>0 && o.items.length>0 && o.items.every(i=>i.employeeId>0));
+}
+
+// Customer search
+var searchTimer;
+document.getElementById('custSearch').addEventListener('input',function(){
+    clearTimeout(searchTimer);var q=this.value.trim();
+    if(q.length<1){document.getElementById('custResults').classList.remove('show');document.getElementById('custNotFound').style.display='none';return;}
+    searchTimer=setTimeout(()=>{
+        fetch('/Pos/SearchCustomer?q='+encodeURIComponent(q)).then(r=>r.json()).then(data=>{
+            var el=document.getElementById('custResults');
+            if(!data.length){el.classList.remove('show');document.getElementById('custNotFound').style.display='block';document.getElementById('newCustPhone').value=q.match(/\d/)?q:'';document.getElementById('newCustName').value=q.match(/\d/)?'':q;return;}
+            document.getElementById('custNotFound').style.display='none';
+            el.innerHTML=data.map(c=>`<div class="cust-item" onclick="selectCustomer(${c.userId},'${c.fullName.replace(/'/g,"\\'")}','${c.phoneNumber}',${c.points})">${c.fullName} <span class="text-muted">— ${c.phoneNumber}</span> <span style="color:var(--gold);float:right;">★${c.points}</span></div>`).join('');
+            el.classList.add('show');
+        });
+    },300);
+});
+
+function selectCustomer(id,name,phone,pts){
+    var o=orders[currentOrder];o.customerId=id;o.customerName=name;o.customerPhone=phone;o.customerPoints=pts;
+    document.getElementById('custSearch').value='';document.getElementById('custResults').classList.remove('show');
+    document.getElementById('custSelected').style.display='block';document.getElementById('custNotFound').style.display='none';
+    document.getElementById('custName').textContent=name;document.getElementById('custPhone').textContent=phone;document.getElementById('custPoints').textContent=pts;
+    document.getElementById('pointsUse').max=pts;calcTotal();
+}
+
+function clearCustomer(){
+    var o=orders[currentOrder];o.customerId=0;o.customerName='';o.customerPhone='';o.customerPoints=0;
+    document.getElementById('custSelected').style.display='none';document.getElementById('custSearch').value='';calcTotal();
+}
+
+function quickAddCustomer(){
+    var n=document.getElementById('newCustName').value.trim(),p=document.getElementById('newCustPhone').value.trim();
+    if(!n||!p){alert('Nhập tên và SĐT');return;}
+    fetch('/Pos/QuickAddCustomer',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:`fullName=${encodeURIComponent(n)}&phoneNumber=${encodeURIComponent(p)}`})
+    .then(r=>r.json()).then(d=>{if(d.success){selectCustomer(d.userId,d.fullName,d.phoneNumber,0);document.getElementById('custNotFound').style.display='none';}else{alert(d.message);}});
+}
+
+// Order tabs
+function renderTabs(){
+    var h='';
+    orders.forEach((o,i)=>{
+        var label=o.customerName?o.customerName:`HĐ ${i+1}`;
+        h+=`<div class="order-tab ${i===currentOrder?'active':''}" data-idx="${i}" onclick="switchOrder(${i})">
+            <i class="bi bi-receipt-cutoff"></i> ${label}
+            ${orders.length>1?`<span class="close-tab" onclick="event.stopPropagation();closeOrder(${i})">✕</span>`:''}
+        </div>`;
+    });
+    h+='<div class="add-tab" onclick="addNewOrder()" title="Thêm hóa đơn tạm"><i class="bi bi-plus-lg"></i></div>';
+    document.getElementById('orderTabs').innerHTML=h;
+}
+
+function switchOrder(i){
+    currentOrder=i;renderTabs();renderOrder();
+    var o=orders[i];
+    if(o.customerId){
+        document.getElementById('custSelected').style.display='block';
+        document.getElementById('custName').textContent=o.customerName;document.getElementById('custPhone').textContent=o.customerPhone;document.getElementById('custPoints').textContent=o.customerPoints;
+        document.getElementById('pointsUse').max=o.customerPoints;
+    } else {document.getElementById('custSelected').style.display='none';}
+    document.getElementById('custSearch').value='';document.getElementById('custNotFound').style.display='none';document.getElementById('custResults').classList.remove('show');
+    document.getElementById('pointsUse').value=0;calcTotal();
+}
+
+function addNewOrder(){orders.push({items:[],customerId:0,customerName:'',customerPhone:'',customerPoints:0});orderCounter++;switchOrder(orders.length-1);renderTabs();}
+
+function closeOrder(i){if(orders.length<=1)return;orders.splice(i,1);if(currentOrder>=orders.length)currentOrder=orders.length-1;switchOrder(currentOrder);renderTabs();}
+
+// Checkout
+function doCheckout(){
+    var o=orders[currentOrder];if(!o.customerId||!o.items.length)return;
+    if(!o.items.every(i=>i.employeeId>0)){alert('Vui lòng chọn nhân viên cho mỗi dịch vụ!');return;}
+    var body=new URLSearchParams();
+    body.append('customerId',o.customerId);body.append('paymentMethod',document.getElementById('payMethod').value);
+    body.append('pointsToUse',document.getElementById('pointsUse').value||0);body.append('notes','');
+    o.items.forEach(item=>{body.append('serviceIds',item.serviceId);body.append('employeeIds',item.employeeId);body.append('quantities',item.qty);});
+    document.getElementById('btnPay').disabled=true;
+    fetch('/Pos/Checkout',{method:'POST',body:body}).then(r=>r.json()).then(d=>{
+        if(d.success){
+            document.getElementById('modalAmount').textContent=d.finalAmount.toLocaleString('vi-VN')+'đ';
+            document.getElementById('modalInvoiceId').textContent='#'+d.invoiceId;
+            document.getElementById('modalPoints').textContent='+'+d.earnedPoints;
+            document.getElementById('modalPrintBtn').href='/Invoice/Print/'+d.invoiceId;
+            window._paidOrderIdx=currentOrder;
+            new bootstrap.Modal(document.getElementById('successModal')).show();
+        } else {alert(d.message);document.getElementById('btnPay').disabled=false;}
+    });
+}
+
+function afterPayment(){
+    var i=window._paidOrderIdx;
+    if(orders.length>1){orders.splice(i,1);if(currentOrder>=orders.length)currentOrder=orders.length-1;}
+    else{orders[0]={items:[],customerId:0,customerName:'',customerPhone:'',customerPoints:0};}
+    switchOrder(currentOrder);renderTabs();
+}
+
+// Service search filter
+document.getElementById('svcSearch').addEventListener('input',function(){
+    var q=this.value.toLowerCase();
+    document.querySelectorAll('.svc-card').forEach(c=>{c.style.display=c.dataset.name.includes(q)?'':'none';});
+});
+
+// Close search results when clicking outside
+document.addEventListener('click',function(e){if(!e.target.closest('.cust-search-wrap'))document.getElementById('custResults').classList.remove('show');});
+
+renderTabs();renderOrder();
+</script>
+</body>
+</html>

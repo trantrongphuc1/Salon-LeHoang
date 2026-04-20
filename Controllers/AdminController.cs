@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Salon_LeHoang.Models;
+using Salon_LeHoang.Models.ViewModels;
 
 namespace Salon_LeHoang.Controllers
 {
@@ -17,64 +18,41 @@ namespace Salon_LeHoang.Controllers
 
         public async Task<IActionResult> Index()
         {
-            var appointments = await _context.Appointments
-                .Include(a => a.User)
-                .Include(a => a.AppointmentDetails)
-                .ThenInclude(ad => ad.Service)
-                .OrderByDescending(a => a.AppointmentDate)
-                .ToListAsync();
+            var today = DateTime.Today;
+            var monthStart = new DateTime(today.Year, today.Month, 1);
+            var monthEnd = monthStart.AddMonths(1);
 
-            return View(appointments);
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> UpdateStatus(int appointmentId, string status)
-        {
-            var appointment = await _context.Appointments.FindAsync(appointmentId);
-            if (appointment != null)
+            var vm = new DashboardViewModel
             {
-                appointment.Status = status;
-                appointment.UpdatedAt = DateTime.Now;
-                await _context.SaveChangesAsync();
-                TempData["Success"] = "Cập nhật trạng thái thành công.";
-            }
-            return RedirectToAction(nameof(Index));
-        }
+                TodayRevenue = await _context.Invoices
+                    .Where(i => i.PaymentDate >= today && i.PaymentDate < today.AddDays(1))
+                    .SumAsync(i => (decimal?)i.FinalAmount) ?? 0,
 
-        [HttpPost]
-        public async Task<IActionResult> CompleteAndInvoice(int appointmentId)
-        {
-            var appointment = await _context.Appointments
-                .Include(a => a.User)
-                .Include(a => a.AppointmentDetails)
-                .FirstOrDefaultAsync(a => a.AppointmentId == appointmentId);
+                TodayInvoiceCount = await _context.Invoices
+                    .CountAsync(i => i.PaymentDate >= today && i.PaymentDate < today.AddDays(1)),
 
-            if (appointment != null && appointment.Status != "Completed")
-            {
-                var totalAmount = appointment.AppointmentDetails.Sum(ad => ad.Price);
-                var earnedPoints = (int)(totalAmount / 10000);
+                TotalCustomers = await _context.Users.CountAsync(u => u.Role == "Customer" && u.IsActive),
 
-                var invoice = new Invoice
-                {
-                    AppointmentId = appointment.AppointmentId,
-                    TotalAmount = totalAmount,
-                    EarnedPoints = earnedPoints,
-                    PaymentDate = DateTime.Now,
-                    PaymentMethod = "Cash",
-                    Notes = "Thanh toán dịch vụ"
-                };
+                TotalEmployees = await _context.Employees.CountAsync(e => e.IsActive),
 
-                _context.Invoices.Add(invoice);
+                TotalServices = await _context.Services.CountAsync(s => s.IsActive),
 
-                appointment.Status = "Completed";
-                appointment.UpdatedAt = DateTime.Now;
-                appointment.User.Points += earnedPoints;
+                MonthRevenue = await _context.Invoices
+                    .Where(i => i.PaymentDate >= monthStart && i.PaymentDate < monthEnd)
+                    .SumAsync(i => (decimal?)i.FinalAmount) ?? 0,
 
-                await _context.SaveChangesAsync();
-                TempData["Success"] = $"Hoàn tất dịch vụ. Khách hàng được cộng {earnedPoints} điểm.";
-            }
+                MonthInvoiceCount = await _context.Invoices
+                    .CountAsync(i => i.PaymentDate >= monthStart && i.PaymentDate < monthEnd),
 
-            return RedirectToAction(nameof(Index));
+                RecentInvoices = await _context.Invoices
+                    .Include(i => i.Customer)
+                    .Include(i => i.InvoiceDetails).ThenInclude(d => d.Service)
+                    .OrderByDescending(i => i.PaymentDate)
+                    .Take(10)
+                    .ToListAsync()
+            };
+
+            return View(vm);
         }
     }
 }

@@ -19,8 +19,9 @@ namespace Salon_LeHoang.Controllers
         {
             if (User.Identity.IsAuthenticated)
             {
-                if (User.IsInRole("Admin")) return RedirectToAction("Index", "Admin");
-                return RedirectToAction("Index", "Customer");
+                if (User.IsInRole("Admin")) return RedirectToAction("Index", "Pos");
+                // Khách hàng không có quyền truy cập hệ thống
+                return RedirectToAction("Login");
             }
             return View();
         }
@@ -41,12 +42,18 @@ namespace Salon_LeHoang.Controllers
                 return View();
             }
 
+            if (user.Role != "Admin")
+            {
+                ViewBag.Error = "Bạn không có quyền truy cập trang quản trị.";
+                return View();
+            }
+
             var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.NameIdentifier, user.UserId.ToString()),
                 new Claim(ClaimTypes.Name, user.FullName),
                 new Claim(ClaimTypes.MobilePhone, user.PhoneNumber),
-                new Claim(ClaimTypes.Role, user.Role ?? "Customer")
+                new Claim(ClaimTypes.Role, user.Role)
             };
 
             var identity = new ClaimsIdentity(claims, "UserAuth");
@@ -54,44 +61,10 @@ namespace Salon_LeHoang.Controllers
 
             await HttpContext.SignInAsync("UserAuth", principal);
 
-            if (user.Role == "Admin")
-                return RedirectToAction("Index", "Admin");
-                
-            return RedirectToAction("Index", "Customer");
+            return RedirectToAction("Index", "Pos");
         }
 
-        [HttpGet]
-        public IActionResult Register()
-        {
-            return View();
-        }
 
-        [HttpPost]
-        public IActionResult Register(string fullName, string phoneNumber, string password)
-        {
-            if (_context.Users.Any(u => u.PhoneNumber == phoneNumber))
-            {
-                ViewBag.Error = "Số điện thoại đã được đăng ký.";
-                return View();
-            }
-
-            var user = new User
-            {
-                FullName = fullName,
-                PhoneNumber = phoneNumber,
-                PasswordHash = password, // In production, hash the password
-                Role = "Customer",
-                Points = 0,
-                IsActive = true,
-                CreatedAt = DateTime.Now
-            };
-
-            _context.Users.Add(user);
-            _context.SaveChanges();
-
-            TempData["Success"] = "Đăng ký thành công. Vui lòng đăng nhập.";
-            return RedirectToAction("Login");
-        }
 
         public async Task<IActionResult> Logout()
         {

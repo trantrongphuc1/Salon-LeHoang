@@ -1,0 +1,61 @@
+@model Salon_LeHoang.Models.Invoice
+@{Layout=null;}
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8"/>
+<title>Hóa đơn #@Model.InvoiceId - Salon LeHoang</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Segoe UI',Arial,sans-serif;font-size:13px;color:#000;padding:20px;max-width:80mm;margin:0 auto;}
+.header{text-align:center;margin-bottom:15px;border-bottom:1px dashed #000;padding-bottom:10px;}
+.header h2{font-size:18px;margin-bottom:2px;}
+.header p{font-size:11px;color:#555;}
+.info{margin-bottom:10px;}
+.info div{display:flex;justify-content:space-between;margin-bottom:3px;}
+.info .label{color:#555;}
+table{width:100%;border-collapse:collapse;margin-bottom:10px;}
+th,td{padding:4px 2px;text-align:left;border-bottom:1px dotted #ccc;}
+th{font-size:11px;text-transform:uppercase;color:#555;}
+.total-section{border-top:1px dashed #000;padding-top:8px;margin-top:5px;}
+.total-row{display:flex;justify-content:space-between;margin-bottom:4px;}
+.total-row.final{font-size:16px;font-weight:bold;margin-top:5px;}
+.footer{text-align:center;margin-top:15px;border-top:1px dashed #000;padding-top:10px;font-size:11px;color:#555;}
+@@media print{body{padding:5px;} .no-print{display:none;}}
+</style>
+</head>
+<body>
+<div class="no-print" style="text-align:center;margin-bottom:15px;">
+<button onclick="window.print()" style="padding:8px 20px;font-size:14px;cursor:pointer;background:#d4af37;border:none;border-radius:5px;font-weight:bold;">🖨️ In hóa đơn</button>
+</div>
+<div class="header">
+<h2>✂️ SALON LEHOANG</h2>
+<p>Hệ thống làm đẹp chuyên nghiệp</p>
+</div>
+<div class="info">
+<div><span class="label">Mã HĐ:</span><span>#@Model.InvoiceId</span></div>
+<div><span class="label">Ngày:</span><span>@Model.PaymentDate.ToString("dd/MM/yyyy HH:mm")</span></div>
+<div><span class="label">Khách hàng:</span><span>@Model.Customer.FullName</span></div>
+<div><span class="label">SĐT:</span><span>@Model.Customer.PhoneNumber</span></div>
+<div><span class="label">Thanh toán:</span><span>@Model.PaymentMethod</span></div>
+</div>
+<table>
+<thead><tr><th>Dịch vụ</th><th>NV</th><th style="text-align:right;">Giá</th></tr></thead>
+<tbody>
+@foreach(var d in Model.InvoiceDetails){
+<tr><td>@d.Service.ServiceName@(d.Quantity>1?" x"+d.Quantity:"")</td><td>@d.Employee.FullName</td><td style="text-align:right;">@String.Format("{0:N0}",d.Price*d.Quantity)đ</td></tr>
+}
+</tbody>
+</table>
+<div class="total-section">
+<div class="total-row"><span>Tổng cộng:</span><span>@String.Format("{0:N0}",Model.TotalAmount)đ</span></div>
+@if(Model.DiscountAmount>0){<div class="total-row"><span>Giảm giá (điểm):</span><span>-@String.Format("{0:N0}",Model.DiscountAmount)đ</span></div>}
+<div class="total-row final"><span>Thành tiền:</span><span>@String.Format("{0:N0}",Model.FinalAmount)đ</span></div>
+@if(Model.EarnedPoints>0){<div class="total-row" style="color:#555;font-size:11px;"><span>Điểm tích lũy:</span><span>+@Model.EarnedPoints điểm</span></div>}
+</div>
+<div class="footer">
+<p>Cảm ơn quý khách! Hẹn gặp lại 💛</p>
+<p>Hotline: 0xxx.xxx.xxx</p>
+</div>
+</body>
+</html>

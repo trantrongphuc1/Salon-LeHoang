@@ -1,123 +1,125 @@
-@model IEnumerable<Salon_LeHoang.Models.Appointment>
+@model Salon_LeHoang.Models.ViewModels.DashboardViewModel
 @{
-    ViewData["Title"] = "Quản trị hệ thống";
-    Layout = "_Layout";
+    ViewData["Title"] = "Dashboard";
 }
 
-<div class="row pt-4">
-    <div class="col-12 mb-4 d-flex justify-content-between align-items-center">
-        <h2 class="text-warning fw-bold m-0"><i class="bi bi-speedometer2 me-2"></i>Admin Dashboard</h2>
-    </div>
-
-    @if (TempData["Success"] != null)
-    {
-        <div class="alert alert-success">@TempData["Success"]</div>
-    }
-
-    <div class="col-12">
-        <div class="card bg-dark text-light border-0 shadow">
-            <div class="card-header bg-transparent border-bottom border-warning pb-3">
-                <h4 class="mb-0 text-warning"><i class="bi bi-list-task me-2"></i>Quản lý Đặt Lịch & Hoá Đơn</h4>
-            </div>
-            <div class="card-body p-0">
-                <div class="table-responsive">
-                    <table class="table table-dark table-hover mb-0 align-middle">
-                        <thead>
-                            <tr>
-                                <th>Mã</th>
-                                <th>Khách hàng</th>
-                                <th>Liên hệ</th>
-                                <th>Lịch hẹn</th>
-                                <th>Dịch vụ</th>
-                                <th>Tổng tiền</th>
-                                <th>Trạng thái</th>
-                                <th class="text-end">Hành động</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach(var item in Model)
-                            {
-                                var totalAmount = item.AppointmentDetails.Sum(ad => ad.Price);
-                                <tr>
-                                    <td>#@item.AppointmentId</td>
-                                    <td>@item.User.FullName</td>
-                                    <td>@item.User.PhoneNumber</td>
-                                    <td>
-                                        <span class="text-info fw-bold">@item.AppointmentDate.ToString("dd/MM")</span>
-                                        <br/>
-                                        <small class="text-muted text-nowrap">@item.AppointmentDate.ToString("HH:mm")</small>
-                                    </td>
-                                    <td>
-                                        <div style="max-width: 200px;" class="text-truncate" title="@string.Join(", ", item.AppointmentDetails.Select(d => d.Service.ServiceName))">
-                                            @foreach(var detail in item.AppointmentDetails)
-                                            {
-                                                <span class="badge bg-secondary me-1">@detail.Service.ServiceName</span>
-                                            }
-                                        </div>
-                                    </td>
-                                    <td class="text-warning fw-bold">@String.Format("{0:N0}đ", totalAmount)</td>
-                                    <td>
-                                        @if (item.Status == "Pending")
-                                        {
-                                            <span class="badge bg-warning text-dark">Chờ xác nhận</span>
-                                        }
-                                        else if (item.Status == "Confirmed")
-                                        {
-                                            <span class="badge bg-info text-dark">Đã xác nhận</span>
-                                        }
-                                        else if (item.Status == "Completed")
-                                        {
-                                            <span class="badge bg-success">Đã hoàn thành</span>
-                                        }
-                                        else if (item.Status == "Cancelled")
-                                        {
-                                            <span class="badge bg-danger">Đã hủy</span>
-                                        }
-                                    </td>
-                                    <td class="text-end text-nowrap">
-                                        @if(item.Status == "Pending")
-                                        {
-                                            <form asp-action="UpdateStatus" method="post" class="d-inline">
-                                                <input type="hidden" name="appointmentId" value="@item.AppointmentId" />
-                                                <input type="hidden" name="status" value="Confirmed" />
-                                                <button type="submit" class="btn btn-sm btn-info" title="Xác nhận lịch"><i class="bi bi-check2"></i></button>
-                                            </form>
-                                            <form asp-action="UpdateStatus" method="post" class="d-inline">
-                                                <input type="hidden" name="appointmentId" value="@item.AppointmentId" />
-                                                <input type="hidden" name="status" value="Cancelled" />
-                                                <button type="submit" class="btn btn-sm btn-danger" title="Hủy lịch" onclick="return confirm('Bạn có chắc chắn huỷ lịch này?');"><i class="bi bi-x-circle"></i></button>
-                                            </form>
-                                        }
-                                        else if(item.Status == "Confirmed")
-                                        {
-                                            <form asp-action="CompleteAndInvoice" method="post" class="d-inline">
-                                                <input type="hidden" name="appointmentId" value="@item.AppointmentId" />
-                                                <button type="submit" class="btn btn-sm btn-success" title="Hoàn tất & Tính điểm" onclick="return confirm('Xác nhận hoàn tất dịch vụ và cộng @((int)(totalAmount/10000)) điểm cho khách?');"><i class="bi bi-cash-coin me-1"></i>Chốt hoá đơn</button>
-                                            </form>
-                                            <form asp-action="UpdateStatus" method="post" class="d-inline">
-                                                <input type="hidden" name="appointmentId" value="@item.AppointmentId" />
-                                                <input type="hidden" name="status" value="Cancelled" />
-                                                <button type="submit" class="btn btn-sm btn-outline-danger" title="Hủy lịch" onclick="return confirm('Bạn có chắc chắn huỷ lịch này?');"><i class="bi bi-x"></i></button>
-                                            </form>
-                                        }
-                                        else if (item.Status == "Completed")
-                                        {
-                                            <button class="btn btn-sm btn-secondary" disabled><i class="bi bi-check2-all"></i> Đã xong</button>
-                                        }
-                                    </td>
-                                </tr>
-                            }
-                            
-                            @if(!Model.Any())
-                            {
-                                <tr>
-                                    <td colspan="8" class="text-center py-4 text-muted">Không có lịch hẹn nào.</td>
-                                </tr>
-                            }
-                        </tbody>
-                    </table>
+<div class="animate-in">
+    <!-- Stats Cards -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-4 col-sm-6">
+            <div class="stat-card">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <div class="text-muted small mb-1">Doanh thu hôm nay</div>
+                        <div class="fs-4 fw-bold" style="color: var(--gold);">@String.Format("{0:N0}đ", Model.TodayRevenue)</div>
+                        <div class="text-muted small mt-1">@Model.TodayInvoiceCount hóa đơn</div>
+                    </div>
+                    <div class="rounded-3 p-2" style="background:rgba(212,175,55,0.1);">
+                        <i class="bi bi-cash-coin fs-4" style="color:var(--gold);"></i>
+                    </div>
                 </div>
             </div>
+        </div>
+        <div class="col-md-4 col-sm-6">
+            <div class="stat-card">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <div class="text-muted small mb-1">Doanh thu tháng này</div>
+                        <div class="fs-4 fw-bold text-info">@String.Format("{0:N0}đ", Model.MonthRevenue)</div>
+                        <div class="text-muted small mt-1">@Model.MonthInvoiceCount hóa đơn</div>
+                    </div>
+                    <div class="rounded-3 p-2" style="background:rgba(59,130,246,0.1);">
+                        <i class="bi bi-graph-up-arrow fs-4 text-info"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 col-sm-6">
+            <div class="stat-card">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <div class="text-muted small mb-1">Khách hàng</div>
+                        <div class="fs-4 fw-bold text-success">@Model.TotalCustomers</div>
+                        <div class="text-muted small mt-1">@Model.TotalEmployees nhân viên · @Model.TotalServices dịch vụ</div>
+                    </div>
+                    <div class="rounded-3 p-2" style="background:rgba(16,185,129,0.1);">
+                        <i class="bi bi-people-fill fs-4 text-success"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="row g-3 mb-4">
+        <div class="col-12">
+            <div class="d-flex flex-wrap gap-2">
+                <a asp-controller="Invoice" asp-action="Create" class="btn btn-gold">
+                    <i class="bi bi-plus-circle me-1"></i> Tạo hóa đơn mới
+                </a>
+                <a asp-controller="Customer" asp-action="Create" class="btn btn-outline-gold">
+                    <i class="bi bi-person-plus me-1"></i> Thêm khách hàng
+                </a>
+                <a asp-controller="Employee" asp-action="Attendance" class="btn btn-outline-gold">
+                    <i class="bi bi-calendar-check me-1"></i> Chấm công
+                </a>
+                <a asp-controller="Employee" asp-action="Payroll" class="btn btn-outline-gold">
+                    <i class="bi bi-cash-stack me-1"></i> Bảng lương
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Invoices -->
+    <div class="card-custom">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h6 class="mb-0 fw-semibold"><i class="bi bi-receipt me-2" style="color:var(--gold);"></i>Hóa đơn gần đây</h6>
+            <a asp-controller="Invoice" asp-action="Index" class="btn btn-sm btn-outline-gold">Xem tất cả</a>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-dark table-custom">
+                <thead>
+                    <tr>
+                        <th>Mã HĐ</th>
+                        <th>Khách hàng</th>
+                        <th>Dịch vụ</th>
+                        <th>Tổng tiền</th>
+                        <th>Thanh toán</th>
+                        <th>Ngày</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.RecentInvoices.Any())
+                    {
+                        @foreach (var inv in Model.RecentInvoices)
+                        {
+                            <tr>
+                                <td><a asp-controller="Invoice" asp-action="Details" asp-route-id="@inv.InvoiceId" class="text-decoration-none" style="color:var(--gold);">#@inv.InvoiceId</a></td>
+                                <td>@inv.Customer.FullName</td>
+                                <td>
+                                    @foreach (var d in inv.InvoiceDetails.Take(2))
+                                    {
+                                        <span class="badge badge-gold me-1">@d.Service.ServiceName</span>
+                                    }
+                                    @if (inv.InvoiceDetails.Count > 2)
+                                    {
+                                        <span class="badge bg-secondary">+@(inv.InvoiceDetails.Count - 2)</span>
+                                    }
+                                </td>
+                                <td class="fw-bold" style="color:var(--gold);">@String.Format("{0:N0}đ", inv.FinalAmount)</td>
+                                <td><span class="badge bg-secondary">@inv.PaymentMethod</span></td>
+                                <td class="text-muted">@inv.PaymentDate.ToString("dd/MM HH:mm")</td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="6" class="text-center py-4 text-muted">Chưa có hóa đơn nào.</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
         </div>
     </div>
 </div>

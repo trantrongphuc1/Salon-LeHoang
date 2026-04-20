@@ -2,11 +2,10 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Salon_LeHoang.Models;
-using System.Security.Claims;
 
 namespace Salon_LeHoang.Controllers
 {
-    [Authorize]
+    [Authorize(Roles = "Admin")]
     public class CustomerController : Controller
     {
         private readonly SalonLeHoangContext _context;
@@ -16,72 +15,116 @@ namespace Salon_LeHoang.Controllers
             _context = context;
         }
 
-        private int GetUserId() => int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
-
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string? search)
         {
-            if (User.IsInRole("Admin")) return RedirectToAction("Index", "Admin");
+            var query = _context.Users.Where(u => u.Role == "Customer").AsQueryable();
 
-            var userId = GetUserId();
-            var user = await _context.Users.FindAsync(userId);
-            var appointments = await _context.Appointments
-                .Include(a => a.AppointmentDetails)
-                .ThenInclude(ad => ad.Service)
-                .Where(a => a.UserId == userId)
-                .OrderByDescending(a => a.AppointmentDate)
-                .Take(10)
-                .ToListAsync();
+            if (!string.IsNullOrEmpty(search))
+            {
+                query = query.Where(u => u.FullName.Contains(search) || u.PhoneNumber.Contains(search));
+                ViewBag.Search = search;
+            }
 
-            ViewBag.Points = user?.Points ?? 0;
-            return View(appointments);
+            var customers = await query.OrderByDescending(u => u.CreatedAt).ToListAsync();
+            return View(customers);
         }
 
-        [HttpGet]
-        public async Task<IActionResult> Booking()
+        public IActionResult Create()
         {
-            var services = await _context.Services.Where(s => s.IsActive == true).ToListAsync();
-            return View(services);
+            return View();
         }
 
         [HttpPost]
-        public async Task<IActionResult> Booking(List<int> serviceIds, DateTime appointmentDate, string notes)
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Create(User customer)
         {
-            if (serviceIds == null || !serviceIds.Any())
+            if (string.IsNullOrWhiteSpace(customer.FullName) || string.IsNullOrWhiteSpace(customer.PhoneNumber))
             {
-                ViewBag.Error = "Vui lòng chọn ít nhất một dịch vụ.";
-                var services = await _context.Services.Where(s => s.IsActive == true).ToListAsync();
-                return View(services);
+                ViewBag.Error = "Vui lòng nhập đầy đủ thông tin.";
+                return View(customer);
             }
 
-            var userId = GetUserId();
-            var appointment = new Appointment
+            // Check duplicate phone
+            if (await _context.Users.AnyAsync(u => u.PhoneNumber == customer.PhoneNumber))
+            {
+                ViewBag.Error = "Số điện thoại đã tồn tại trong hệ thống.";
+                return View(customer);
+            }
+
+            customer.Role = "Customer";
+            customer.PasswordHash = "customer123"; // default password
+            customer.Points = 0;
+            customer.IsActive = true;
+            customer.CreatedAt = DateTime.Now;
+
+            _context.Users.Add(customer);
+            await _context.SaveChangesAsync();
+            TempData["Success"] = "Thêm khách hàng thành công!";
+            return RedirectToAction(nameof(Index));
+        }
+
+        public async Task<IActionResult> Edit(int id)
+        {
+            var customer = await _context.Users.FindAsync(id);
+            if (customer == null || customer.Role != "Customer") return NotFound();
+            return View(customer);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(User customer)
+        {
+            var existing = await _context.Users.FindAsync(customer.UserId);
+            if (existing == null || existing.Role != "Customer") return NotFound();
+
+            if (string.IsNullOrWhiteSpace(customer.FullName))
+            {
+                ViewBag.Error = "Vui lòng nhập đầy đủ thông tin.";
+                return View(customer);
+            }
+
+            existing.FullName = customer.FullName;
+            existing.PhoneNumber = customer.PhoneNumber;
+            existing.IsActive = customer.IsActive;
+
+            await _context.SaveChangesAsync();
+            TempData["Success"] = "Cập nhật khách hàng thành công!";
+            return RedirectToAction(nameof(Index));
+        }
+
+        public async Task<IActionResult> Details(int id)
+        {
+            var customer = await _context.Users
+                .Include(u => u.Invoices)
+                    .ThenInclude(i => i.InvoiceDetails)
+                        .ThenInclude(d => d.Service)
+                .Include(u => u.PointHistories)
+                .FirstOrDefaultAsync(u => u.UserId == id && u.Role == "Customer");
+
+            if (customer == null) return NotFound();
+            return View(customer);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> AdjustPoints(int userId, int points, string reason)
+        {
+            var customer = await _context.Users.FindAsync(userId);
+            if (customer == null || customer.Role != "Customer") return NotFound();
+
+            customer.Points += points;
+            if (customer.Points < 0) customer.Points = 0;
+
+            _context.PointHistories.Add(new PointHistory
             {
                 UserId = userId,
-                AppointmentDate = appointmentDate,
-                Notes = notes,
-                Status = "Pending",
-                CreatedAt = DateTime.Now,
-                UpdatedAt = DateTime.Now
-            };
-
-            _context.Appointments.Add(appointment);
-            await _context.SaveChangesAsync();
-
-            var selectedServices = await _context.Services.Where(s => serviceIds.Contains(s.ServiceId)).ToListAsync();
-            foreach (var service in selectedServices)
-            {
-                _context.AppointmentDetails.Add(new AppointmentDetail
-                {
-                    AppointmentId = appointment.AppointmentId,
-                    ServiceId = service.ServiceId,
-                    Price = service.Price
-                });
-            }
+                PointsChanged = points,
+                Description = reason ?? (points > 0 ? "Cộng điểm thủ công" : "Trừ điểm thủ công"),
+                CreatedAt = DateTime.Now
+            });
 
             await _context.SaveChangesAsync();
-
-            TempData["Success"] = "Đặt lịch thành công! Chúng tôi sẽ liên hệ lại với bạn.";
-            return RedirectToAction(nameof(Index));
+            TempData["Success"] = $"Đã điều chỉnh {points} điểm cho khách hàng.";
+            return RedirectToAction(nameof(Details), new { id = userId });
         }
     }
 }

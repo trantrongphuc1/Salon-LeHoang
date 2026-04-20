@@ -1,0 +1,58 @@
+@model Salon_LeHoang.Models.Employee
+@{
+    ViewData["Title"] = "Thêm nhân viên";
+}
+
+<div class="animate-in">
+    <div class="d-flex align-items-center gap-2 mb-4">
+        <a asp-action="Index" class="btn btn-sm btn-outline-secondary"><i class="bi bi-arrow-left"></i></a>
+        <h4 class="fw-bold mb-0">Thêm nhân viên mới</h4>
+    </div>
+
+    @if (ViewBag.Error != null)
+    {
+        <div class="alert alert-custom-error"><i class="bi bi-exclamation-circle me-2"></i>@ViewBag.Error</div>
+    }
+
+    <div class="card-custom">
+        <div class="card-body p-4" style="background:var(--bg-card);">
+            <form asp-action="Create" method="post">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Họ tên <span class="text-danger">*</span></label>
+                        <input asp-for="FullName" class="form-control" placeholder="Nguyễn Văn B" />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Số điện thoại</label>
+                        <input asp-for="PhoneNumber" class="form-control" placeholder="0901234567" />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Vị trí</label>
+                        <input asp-for="Position" class="form-control" placeholder="VD: Thợ cắt tóc, Thợ nails..." />
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Lương cơ bản (VNĐ/tháng) <span class="text-danger">*</span></label>
+                        <input asp-for="BaseSalary" type="number" class="form-control" placeholder="6000000" min="0" />
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Hoa hồng (%) <span class="text-danger">*</span></label>
+                        <input asp-for="CommissionRate" type="number" step="0.5" class="form-control" placeholder="5" min="0" max="100" value="3" />
+                        <div class="form-text text-muted">Thường 3-5% trên hóa đơn</div>
+                    </div>
+
+                    <div class="col-12">
+                        <div class="alert" style="background:rgba(59,130,246,0.1);border:1px solid rgba(59,130,246,0.2);color:#60a5fa;border-radius:10px;">
+                            <i class="bi bi-info-circle me-2"></i>
+                            <strong>Cách tính lương:</strong> Công chuẩn 28/30 ngày. Nghỉ ≤ 2 ngày = hưởng full lương. Nghỉ > 2 ngày = trừ lương theo ngày vượt quá. Hoa hồng tính trên tổng hóa đơn nhân viên thực hiện.
+                        </div>
+                    </div>
+
+                    <div class="col-12 mt-3">
+                        <button type="submit" class="btn btn-gold px-4"><i class="bi bi-check-circle me-1"></i> Thêm nhân viên</button>
+                        <a asp-action="Index" class="btn btn-outline-secondary ms-2">Hủy</a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

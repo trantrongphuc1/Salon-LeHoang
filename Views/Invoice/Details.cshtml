@@ -1,0 +1,49 @@
+@model Salon_LeHoang.Models.Invoice
+@{
+    ViewData["Title"] = $"Hóa đơn #{Model.InvoiceId}";
+}
+<div class="animate-in">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div class="d-flex align-items-center gap-2">
+            <a asp-action="Index" class="btn btn-sm btn-outline-secondary"><i class="bi bi-arrow-left"></i></a>
+            <h4 class="fw-bold mb-0">Hóa đơn #@Model.InvoiceId</h4>
+        </div>
+        <a asp-action="Print" asp-route-id="@Model.InvoiceId" target="_blank" class="btn btn-outline-gold"><i class="bi bi-printer me-1"></i> In</a>
+    </div>
+    <div class="row g-4">
+        <div class="col-md-4">
+            <div class="card-custom p-4">
+                <h6 class="fw-semibold mb-3" style="color:var(--gold);">Khách hàng</h6>
+                <p class="mb-1 fw-semibold">@Model.Customer.FullName</p>
+                <p class="mb-1 text-muted">@Model.Customer.PhoneNumber</p>
+                <p class="mb-0"><span class="badge badge-gold">@Model.Customer.Points điểm</span></p>
+                <hr style="border-color:var(--border-color);" />
+                <div class="small">
+                    <div class="d-flex justify-content-between mb-1"><span class="text-muted">Ngày:</span><span>@Model.PaymentDate.ToString("dd/MM/yyyy HH:mm")</span></div>
+                    <div class="d-flex justify-content-between mb-1"><span class="text-muted">Thanh toán:</span><span>@Model.PaymentMethod</span></div>
+                    <div class="d-flex justify-content-between mb-1"><span class="text-muted">Tổng cộng:</span><span>@String.Format("{0:N0}đ", Model.TotalAmount)</span></div>
+                    @if(Model.DiscountAmount > 0){<div class="d-flex justify-content-between mb-1"><span class="text-muted">Giảm:</span><span class="text-danger">-@String.Format("{0:N0}đ", Model.DiscountAmount)</span></div>}
+                    <div class="d-flex justify-content-between mb-1"><span class="text-muted">Điểm cộng:</span><span class="text-success">+@Model.EarnedPoints</span></div>
+                </div>
+                <hr style="border-color:var(--border-color);" />
+                <div class="d-flex justify-content-between"><span class="fw-bold">Thành tiền:</span><span class="fw-bold fs-4" style="color:var(--gold);">@String.Format("{0:N0}đ", Model.FinalAmount)</span></div>
+            </div>
+        </div>
+        <div class="col-md-8">
+            <div class="card-custom">
+                <div class="card-header"><h6 class="mb-0 fw-semibold">Chi tiết dịch vụ</h6></div>
+                <div class="table-responsive">
+                    <table class="table table-dark table-custom">
+                        <thead><tr><th>#</th><th>Dịch vụ</th><th>Nhân viên</th><th>Đơn giá</th><th>SL</th><th>Thành tiền</th></tr></thead>
+                        <tbody>
+                            @{int stt=1;}
+                            @foreach(var d in Model.InvoiceDetails){
+                            <tr><td>@stt</td><td class="fw-semibold">@d.Service.ServiceName</td><td>@d.Employee.FullName</td><td>@String.Format("{0:N0}đ",d.Price)</td><td>@d.Quantity</td><td class="fw-bold" style="color:var(--gold);">@String.Format("{0:N0}đ",d.Price*d.Quantity)</td></tr>
+                            stt++;}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

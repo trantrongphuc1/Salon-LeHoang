@@ -1,0 +1,60 @@
+@model IEnumerable<Salon_LeHoang.Models.Employee>
+@{
+    ViewData["Title"] = "Quản lý Nhân viên";
+}
+
+<div class="animate-in">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h4 class="fw-bold mb-0"><i class="bi bi-person-badge-fill me-2" style="color:var(--gold);"></i>Nhân viên</h4>
+        <a asp-action="Create" class="btn btn-gold"><i class="bi bi-person-plus me-1"></i> Thêm nhân viên</a>
+    </div>
+
+    <div class="card-custom">
+        <div class="table-responsive">
+            <table class="table table-dark table-custom">
+                <thead>
+                    <tr>
+                        <th>Mã</th>
+                        <th>Họ tên</th>
+                        <th>SĐT</th>
+                        <th>Vị trí</th>
+                        <th>Lương cơ bản</th>
+                        <th>Hoa hồng (%)</th>
+                        <th>Trạng thái</th>
+                        <th class="text-end">Hành động</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var e in Model)
+                    {
+                        <tr class="@(!e.IsActive ? "opacity-50" : "")">
+                            <td>#@e.EmployeeId</td>
+                            <td class="fw-semibold">@e.FullName</td>
+                            <td>@(e.PhoneNumber ?? "—")</td>
+                            <td>@(e.Position ?? "—")</td>
+                            <td class="fw-bold" style="color:var(--gold);">@String.Format("{0:N0}đ", e.BaseSalary)</td>
+                            <td><span class="badge badge-gold">@e.CommissionRate%</span></td>
+                            <td>
+                                @if (e.IsActive) { <span class="badge bg-success">Hoạt động</span> }
+                                else { <span class="badge bg-secondary">Nghỉ</span> }
+                            </td>
+                            <td class="text-end text-nowrap">
+                                <a asp-action="Edit" asp-route-id="@e.EmployeeId" class="btn btn-sm btn-outline-gold"><i class="bi bi-pencil"></i></a>
+                                <form asp-action="ToggleActive" method="post" class="d-inline">
+                                    <input type="hidden" name="id" value="@e.EmployeeId" />
+                                    <button type="submit" class="btn btn-sm @(e.IsActive ? "btn-outline-secondary" : "btn-outline-success")">
+                                        <i class="bi @(e.IsActive ? "bi-toggle-on" : "bi-toggle-off")"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                    @if (!Model.Any())
+                    {
+                        <tr><td colspan="8" class="text-center py-4 text-muted">Chưa có nhân viên nào.</td></tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,49 @@
+@model Salon_LeHoang.Models.Service
+@{
+    ViewData["Title"] = "Thêm dịch vụ";
+}
+
+<div class="animate-in">
+    <div class="d-flex align-items-center gap-2 mb-4">
+        <a asp-action="Index" class="btn btn-sm btn-outline-secondary"><i class="bi bi-arrow-left"></i></a>
+        <h4 class="fw-bold mb-0">Thêm dịch vụ mới</h4>
+    </div>
+
+    @if (ViewBag.Error != null)
+    {
+        <div class="alert alert-custom-error"><i class="bi bi-exclamation-circle me-2"></i>@ViewBag.Error</div>
+    }
+
+    <div class="card-custom">
+        <div class="card-body p-4" style="background:var(--bg-card);">
+            <form asp-action="Create" method="post">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Tên dịch vụ <span class="text-danger">*</span></label>
+                        <input asp-for="ServiceName" class="form-control" placeholder="VD: Cắt tóc nam" />
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Giá (VNĐ) <span class="text-danger">*</span></label>
+                        <input asp-for="Price" type="number" class="form-control" placeholder="100000" min="0" />
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Thời gian (phút)</label>
+                        <input asp-for="DurationMinutes" type="number" class="form-control" value="30" min="1" />
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label">Mô tả</label>
+                        <textarea asp-for="Description" class="form-control" rows="3" placeholder="Mô tả chi tiết dịch vụ..."></textarea>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label">URL Hình ảnh</label>
+                        <input asp-for="ImageUrl" class="form-control" placeholder="https://..." />
+                    </div>
+                    <div class="col-12 mt-4">
+                        <button type="submit" class="btn btn-gold px-4"><i class="bi bi-check-circle me-1"></i> Thêm dịch vụ</button>
+                        <a asp-action="Index" class="btn btn-outline-secondary ms-2">Hủy</a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

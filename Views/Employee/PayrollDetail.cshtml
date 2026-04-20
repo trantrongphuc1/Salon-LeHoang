@@ -1,0 +1,124 @@
+@model Salon_LeHoang.Models.ViewModels.EmployeePayrollItem
+@{
+    ViewData["Title"] = $"Lương {Model.Employee.FullName}";
+    var invoiceDetails = ViewBag.InvoiceDetails as List<Salon_LeHoang.Models.InvoiceDetail>;
+    var month = (int)ViewBag.Month;
+    var year = (int)ViewBag.Year;
+}
+
+<div class="animate-in">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div class="d-flex align-items-center gap-2">
+            <a asp-action="Payroll" asp-route-month="@month" asp-route-year="@year" class="btn btn-sm btn-outline-secondary no-print"><i class="bi bi-arrow-left"></i></a>
+            <h4 class="fw-bold mb-0">Bảng lương: @Model.Employee.FullName — @month/@year</h4>
+        </div>
+        <button onclick="window.print();" class="btn btn-outline-gold no-print"><i class="bi bi-printer me-1"></i> In</button>
+    </div>
+
+    <div class="row g-4">
+        <!-- Thông tin nhân viên -->
+        <div class="col-md-4">
+            <div class="card-custom p-4">
+                <h6 class="fw-semibold mb-3" style="color:var(--gold);"><i class="bi bi-person-badge me-2"></i>Thông tin</h6>
+                <table class="table table-dark table-sm table-borderless mb-0">
+                    <tr><td class="text-muted">Họ tên:</td><td class="fw-semibold">@Model.Employee.FullName</td></tr>
+                    <tr><td class="text-muted">Vị trí:</td><td>@(Model.Employee.Position ?? "—")</td></tr>
+                    <tr><td class="text-muted">Lương CB:</td><td class="fw-bold" style="color:var(--gold);">@String.Format("{0:N0}đ", Model.Employee.BaseSalary)</td></tr>
+                    <tr><td class="text-muted">Hoa hồng:</td><td><span class="badge badge-gold">@Model.Employee.CommissionRate%</span></td></tr>
+                </table>
+
+                <hr style="border-color:var(--border-color);" />
+
+                <h6 class="fw-semibold mb-3" style="color:var(--gold);"><i class="bi bi-calculator me-2"></i>Tính lương</h6>
+                <table class="table table-dark table-sm table-borderless mb-0">
+                    <tr>
+                        <td class="text-muted">Ngày nghỉ:</td>
+                        <td>
+                            @Model.DaysOff ngày
+                            @if (Model.ExcessDaysOff > 0)
+                            {
+                                <span class="badge badge-violation ms-1">Vượt @Model.ExcessDaysOff ngày</span>
+                            }
+                        </td>
+                    </tr>
+                    <tr><td class="text-muted">Ngày công thực tế:</td><td>@Model.ActualWorkDays / 28 ngày</td></tr>
+                    <tr><td class="text-muted">Lương theo công:</td><td class="fw-semibold">@String.Format("{0:N0}đ", Model.BaseSalaryEarned)</td></tr>
+                    <tr><td class="text-muted">Doanh thu HĐ:</td><td>@String.Format("{0:N0}đ", Model.TotalInvoiceAmount)</td></tr>
+                    <tr><td class="text-muted">Hoa hồng:</td><td class="text-info">@String.Format("{0:N0}đ", Model.CommissionEarned)</td></tr>
+                </table>
+
+                <hr style="border-color:var(--border-color);" />
+
+                <div class="d-flex justify-content-between align-items-center">
+                    <span class="fw-bold fs-5">TỔNG LƯƠNG:</span>
+                    <span class="fw-bold fs-4" style="color:var(--gold);">@String.Format("{0:N0}đ", Model.TotalSalary)</span>
+                </div>
+
+                @if (!string.IsNullOrEmpty(Model.AttendanceNotes))
+                {
+                    <hr style="border-color:var(--border-color);" />
+                    <div class="small text-muted">
+                        <strong>Ghi chú nghỉ:</strong> @Model.AttendanceNotes
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- Chi tiết hóa đơn -->
+        <div class="col-md-8">
+            <div class="card-custom">
+                <div class="card-header">
+                    <h6 class="mb-0 fw-semibold"><i class="bi bi-receipt me-2" style="color:var(--gold);"></i>Hóa đơn đã thực hiện trong tháng</h6>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-dark table-custom">
+                        <thead>
+                            <tr>
+                                <th>Mã HĐ</th>
+                                <th>Khách hàng</th>
+                                <th>Dịch vụ</th>
+                                <th>Giá</th>
+                                <th>SL</th>
+                                <th>Thành tiền</th>
+                                <th>Hoa hồng</th>
+                                <th>Ngày</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (invoiceDetails != null && invoiceDetails.Any())
+                            {
+                                decimal totalCommission = 0;
+                                @foreach (var d in invoiceDetails)
+                                {
+                                    var lineTotal = d.Price * d.Quantity;
+                                    var commission = lineTotal * Model.Employee.CommissionRate / 100;
+                                    totalCommission += commission;
+                                    <tr>
+                                        <td><a asp-controller="Invoice" asp-action="Details" asp-route-id="@d.InvoiceId" class="text-decoration-none" style="color:var(--gold);">#@d.InvoiceId</a></td>
+                                        <td>@d.Invoice.Customer.FullName</td>
+                                        <td>@d.Service.ServiceName</td>
+                                        <td>@String.Format("{0:N0}đ", d.Price)</td>
+                                        <td>@d.Quantity</td>
+                                        <td class="fw-semibold">@String.Format("{0:N0}đ", lineTotal)</td>
+                                        <td class="text-info">@String.Format("{0:N0}đ", commission)</td>
+                                        <td class="text-muted">@d.Invoice.PaymentDate.ToString("dd/MM HH:mm")</td>
+                                    </tr>
+                                }
+                                <tr style="border-top:2px solid var(--gold);">
+                                    <td colspan="5" class="fw-bold text-end">TỔNG:</td>
+                                    <td class="fw-bold" style="color:var(--gold);">@String.Format("{0:N0}đ", invoiceDetails.Sum(d => d.Price * d.Quantity))</td>
+                                    <td class="fw-bold text-info">@String.Format("{0:N0}đ", totalCommission)</td>
+                                    <td></td>
+                                </tr>
+                            }
+                            else
+                            {
+                                <tr><td colspan="8" class="text-center py-4 text-muted">Không có hóa đơn nào trong tháng.</td></tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
