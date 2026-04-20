@@ -19,7 +19,11 @@
             <form asp-action="Edit" method="post">
                 <input type="hidden" asp-for="ServiceId" />
                 <div class="row g-3">
-                    <div class="col-md-6">
+                    <div class="col-md-3">
+                        <label class="form-label">Mã dịch vụ</label>
+                        <input asp-for="ServiceCode" class="form-control" />
+                    </div>
+                    <div class="col-md-9">
                         <label class="form-label">Tên dịch vụ <span class="text-danger">*</span></label>
                         <input asp-for="ServiceName" class="form-control" />
                     </div>

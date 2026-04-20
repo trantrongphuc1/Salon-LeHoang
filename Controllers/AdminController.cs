@@ -20,39 +20,77 @@ namespace Salon_LeHoang.Controllers
         {
             var today = DateTime.Today;
             var monthStart = new DateTime(today.Year, today.Month, 1);
-            var monthEnd = monthStart.AddMonths(1);
+            var yearStart = new DateTime(today.Year, 1, 1);
 
-            var vm = new DashboardViewModel
+            var todayInvoices = await _context.Invoices
+                .Include(i => i.InvoiceDetails)
+                .Where(i => i.PaymentDate >= today)
+                .ToListAsync();
+
+            var monthInvoices = await _context.Invoices
+                .Where(i => i.PaymentDate >= monthStart)
+                .ToListAsync();
+
+            var yearInvoices = await _context.Invoices
+                .Where(i => i.PaymentDate >= yearStart)
+                .ToListAsync();
+
+            var totalCustomers = await _context.Users.CountAsync(u => u.Role == "Customer" && u.IsActive);
+            var totalEmployees = await _context.Employees.CountAsync(e => e.IsActive);
+            var totalServices = await _context.Services.CountAsync(s => s.IsActive);
+
+            var recentInvoices = await _context.Invoices
+                .Include(i => i.Customer)
+                .Include(i => i.InvoiceDetails).ThenInclude(d => d.Service)
+                .OrderByDescending(i => i.PaymentDate)
+                .Take(5)
+                .ToListAsync();
+
+            // Top Services
+            var topServices = await _context.InvoiceDetails
+                .Include(d => d.Service)
+                .GroupBy(d => d.Service.ServiceName)
+                .Select(g => new TopServiceViewModel
+                {
+                    ServiceName = g.Key,
+                    UsageCount = g.Sum(d => d.Quantity),
+                    TotalRevenue = g.Sum(d => d.Price * d.Quantity)
+                })
+                .OrderByDescending(x => x.UsageCount)
+                .Take(5)
+                .ToListAsync();
+
+            // Top Customers
+            var topCustomers = await _context.Invoices
+                .Include(i => i.Customer)
+                .GroupBy(i => new { i.Customer.FullName, i.Customer.PhoneNumber })
+                .Select(g => new TopCustomerViewModel
+                {
+                    FullName = g.Key.FullName,
+                    PhoneNumber = g.Key.PhoneNumber,
+                    InvoiceCount = g.Count(),
+                    TotalSpent = g.Sum(i => i.FinalAmount)
+                })
+                .OrderByDescending(x => x.TotalSpent)
+                .Take(5)
+                .ToListAsync();
+
+            var viewModel = new DashboardViewModel
             {
-                TodayRevenue = await _context.Invoices
-                    .Where(i => i.PaymentDate >= today && i.PaymentDate < today.AddDays(1))
-                    .SumAsync(i => (decimal?)i.FinalAmount) ?? 0,
-
-                TodayInvoiceCount = await _context.Invoices
-                    .CountAsync(i => i.PaymentDate >= today && i.PaymentDate < today.AddDays(1)),
-
-                TotalCustomers = await _context.Users.CountAsync(u => u.Role == "Customer" && u.IsActive),
-
-                TotalEmployees = await _context.Employees.CountAsync(e => e.IsActive),
-
-                TotalServices = await _context.Services.CountAsync(s => s.IsActive),
-
-                MonthRevenue = await _context.Invoices
-                    .Where(i => i.PaymentDate >= monthStart && i.PaymentDate < monthEnd)
-                    .SumAsync(i => (decimal?)i.FinalAmount) ?? 0,
-
-                MonthInvoiceCount = await _context.Invoices
-                    .CountAsync(i => i.PaymentDate >= monthStart && i.PaymentDate < monthEnd),
-
-                RecentInvoices = await _context.Invoices
-                    .Include(i => i.Customer)
-                    .Include(i => i.InvoiceDetails).ThenInclude(d => d.Service)
-                    .OrderByDescending(i => i.PaymentDate)
-                    .Take(10)
-                    .ToListAsync()
+                TodayRevenue = todayInvoices.Sum(i => i.FinalAmount),
+                TodayInvoiceCount = todayInvoices.Count,
+                MonthRevenue = monthInvoices.Sum(i => i.FinalAmount),
+                MonthInvoiceCount = monthInvoices.Count,
+                YearRevenue = yearInvoices.Sum(i => i.FinalAmount),
+                TotalCustomers = totalCustomers,
+                TotalEmployees = totalEmployees,
+                TotalServices = totalServices,
+                RecentInvoices = recentInvoices,
+                TopServices = topServices,
+                TopCustomers = topCustomers
             };
 
-            return View(vm);
+            return View(viewModel);
         }
     }
 }

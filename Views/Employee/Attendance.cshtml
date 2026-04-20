@@ -47,43 +47,43 @@
                         <th>Nhân viên</th>
                         <th>Vị trí</th>
                         <th>Ngày nghỉ</th>
-                        <th>Ghi chú ngày nghỉ</th>
-                        <th>Trạng thái</th>
+                        <th>Ghi chú nghỉ</th>
+                        <th>Ngày trễ</th>
+                        <th>Ghi chú trễ</th>
                         <th class="text-end">Cập nhật</th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach (var item in Model.Items)
                     {
-                        <tr class="@(item.IsViolation ? "table-danger" : "")">
+                        <tr>
                             <td class="fw-semibold">@item.Employee.FullName</td>
                             <td class="text-muted">@(item.Employee.Position ?? "—")</td>
-                            <td colspan="4">
-                                <form asp-action="UpdateAttendance" method="post" class="d-flex gap-2 align-items-center">
+                            <td colspan="5">
+                                <form asp-action="UpdateAttendance" method="post" class="d-flex gap-2 align-items-center flex-wrap">
                                     <input type="hidden" name="employeeId" value="@item.Employee.EmployeeId" />
                                     <input type="hidden" name="month" value="@Model.Month" />
                                     <input type="hidden" name="year" value="@Model.Year" />
-                                    <input type="number" name="daysOff" value="@item.DaysOff" min="0" max="30"
-                                           class="form-control form-control-sm @(item.IsViolation ? "border-danger" : "")"
-                                           style="width:70px;" />
-                                    <input type="text" name="notes" value="@item.Notes" class="form-control form-control-sm" placeholder="VD: Nghỉ 5, 12, 27..." style="min-width:150px;flex:1;" />
-                                    <span class="text-nowrap">
+                                    
+                                    <div class="d-flex align-items-center gap-1">
+                                        <input type="number" name="daysOff" value="@item.DaysOff" min="0" max="31" class="form-control form-control-sm" style="width:60px;" title="Ngày nghỉ" />
+                                        <input type="text" name="notes" value="@item.Notes" class="form-control form-control-sm" placeholder="Ghi chú nghỉ..." style="width:120px;" />
+                                    </div>
+
+                                    <div class="d-flex align-items-center gap-1">
+                                        <input type="number" name="lateDays" value="@item.LateDays" min="0" max="31" class="form-control form-control-sm" style="width:60px;" title="Ngày trễ" />
+                                        <input type="text" name="lateNotes" value="@item.LateNotes" class="form-control form-control-sm" placeholder="Ghi chú trễ..." style="width:120px;" />
+                                    </div>
+
+                                    <span class="flex-grow-1">
                                         @if (item.IsViolation)
                                         {
                                             <span class="badge badge-violation">
-                                                <i class="bi bi-exclamation-triangle me-1"></i>Vi phạm! Vượt @(item.DaysOff - 2) ngày
+                                                <i class="bi bi-exclamation-triangle me-1"></i>Vi phạm nội quy
                                             </span>
                                         }
-                                        else if (item.DaysOff > 0)
-                                        {
-                                            <span class="badge bg-warning text-dark">Nghỉ @item.DaysOff ngày</span>
-                                        }
-                                        else
-                                        {
-                                            <span class="badge bg-success">Đủ công</span>
-                                        }
                                     </span>
-                                    <button type="submit" class="btn btn-sm btn-outline-gold text-nowrap"><i class="bi bi-save me-1"></i>Lưu</button>
+                                    <button type="submit" class="btn btn-sm btn-gold text-nowrap"><i class="bi bi-save me-1"></i>Lưu</button>
                                 </form>
                             </td>
                         </tr>

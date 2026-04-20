@@ -130,37 +130,52 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);heigh
         <div class="add-tab" onclick="addNewOrder()" title="Thêm hóa đơn tạm"><i class="bi bi-plus-lg"></i></div>
     </div>
 
-    <!-- Customer section -->
-    <div class="cust-section">
-        <div class="cust-search-wrap">
-            <input type="text" class="form-control form-control-sm" id="custSearch" placeholder="🔍 Tìm khách hàng (SĐT/Tên)..." style="background:var(--bg);border-color:var(--border);color:var(--text);border-radius:8px;font-size:.8rem;" autocomplete="off"/>
-            <div class="cust-results" id="custResults"></div>
-        </div>
-        <div id="custSelected" style="display:none;margin-top:.4rem;">
-            <div class="cust-selected">
-                <div><span class="cust-name" id="custName"></span><br><small class="text-muted" id="custPhone"></small></div>
-                <div class="d-flex align-items-center gap-2">
-                    <span class="cust-pts"><i class="bi bi-star-fill"></i> <span id="custPoints">0</span> điểm</span>
-                    <span class="text-danger" style="cursor:pointer;font-size:.75rem;" onclick="clearCustomer()"><i class="bi bi-x-circle"></i></span>
+    <!-- Order items header (Customer & Employees) - Hidden until items exist -->
+    <div id="orderHeader" style="display:none; padding: .6rem; border-bottom: 1px solid var(--border);">
+        <div class="mb-2">
+            <label class="small text-muted mb-1 d-block">Khách hàng</label>
+            <div class="cust-search-wrap">
+                <input type="text" class="form-control form-control-sm" id="custSearch" placeholder="🔍 SĐT hoặc Tên..." style="background:var(--bg);border-color:var(--border);color:var(--text);border-radius:8px;font-size:.8rem;" autocomplete="off"/>
+                <div class="cust-results" id="custResults"></div>
+            </div>
+            <div id="custSelected" style="display:none;margin-top:.4rem;">
+                <div class="cust-selected">
+                    <div><span class="cust-name" id="custName"></span><br><small class="text-muted" id="custPhone"></small></div>
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="cust-pts"><i class="bi bi-star-fill"></i> <span id="custPoints">0</span></span>
+                        <span class="text-danger" style="cursor:pointer;font-size:.75rem;" onclick="clearCustomer()"><i class="bi bi-x-circle"></i></span>
+                    </div>
+                </div>
+            </div>
+            <div id="custNotFound" style="display:none;margin-top:.4rem;">
+                <div class="d-flex gap-1">
+                    <input type="text" id="newCustName" class="form-control form-control-sm" placeholder="Tên" style="background:var(--bg);border-color:var(--border);color:var(--text);font-size:.75rem;"/>
+                    <input type="text" id="newCustPhone" class="form-control form-control-sm" placeholder="SĐT" style="background:var(--bg);border-color:var(--border);color:var(--text);font-size:.75rem;width:110px;"/>
+                    <button class="btn btn-sm" onclick="quickAddCustomer()" style="background:var(--gold);color:#000;font-size:.7rem;white-space:nowrap;">+ Thêm</button>
                 </div>
             </div>
         </div>
-        <div id="custNotFound" style="display:none;margin-top:.4rem;">
-            <div class="d-flex gap-1">
-                <input type="text" id="newCustName" class="form-control form-control-sm" placeholder="Tên" style="background:var(--bg);border-color:var(--border);color:var(--text);font-size:.75rem;"/>
-                <input type="text" id="newCustPhone" class="form-control form-control-sm" placeholder="SĐT" style="background:var(--bg);border-color:var(--border);color:var(--text);font-size:.75rem;width:110px;"/>
-                <button class="btn btn-sm" onclick="quickAddCustomer()" style="background:var(--gold);color:#000;font-size:.7rem;white-space:nowrap;">+ Thêm</button>
+        <div class="row g-2">
+            <div class="col-6">
+                <label class="small text-muted mb-1 d-block">Thợ chính</label>
+                <select id="mainEmp1" class="form-select form-select-sm" style="background:var(--bg);border-color:var(--border);color:var(--text);font-size:.8rem;" onchange="syncGlobalEmp(1, this.value)">
+                </select>
+            </div>
+            <div class="col-6">
+                <label class="small text-muted mb-1 d-block">Thợ phụ (nếu có)</label>
+                <select id="mainEmp2" class="form-select form-select-sm" style="background:var(--bg);border-color:var(--border);color:var(--text);font-size:.8rem;" onchange="syncGlobalEmp(2, this.value)">
+                </select>
             </div>
         </div>
     </div>
 
-    <!-- Order items -->
+    <!-- Order items list -->
     <div class="order-items" id="orderItems">
         <div class="empty-state" id="emptyOrder"><i class="bi bi-cart3"></i>Chọn dịch vụ bên trái</div>
     </div>
 
-    <!-- Footer / totals -->
-    <div class="order-footer">
+    <!-- Footer / totals - Hidden until items exist -->
+    <div class="order-footer" id="orderFooter" style="display:none;">
         <div class="total-row"><span>Tổng cộng:</span><span id="totalAmount">0đ</span></div>
         <div class="total-row" id="discountRow" style="display:none;"><span>Giảm (điểm):</span><span class="text-danger" id="discountAmount">0đ</span></div>
         <div class="total-row grand"><span>Thanh toán:</span><span id="finalAmount">0đ</span></div>
@@ -191,17 +206,28 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);heigh
 <script src="~/lib/jquery/dist/jquery.min.js"></script>
 <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
 <script>
+var SERVICES_LIST = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(services?.Select(s => new { id = s.ServiceId, name = s.ServiceName, price = s.Price })));
 var SERVICES = {};
-@if(services!=null){foreach(var s in services){@:SERVICES[@s.ServiceId]={id:@s.ServiceId,name:"@Html.Raw(s.ServiceName.Replace("\"","\\\""))",price:@s.Price};
-}}
-var EMPLOYEES = [];
-@if(employees!=null){foreach(var e in employees){@:EMPLOYEES.push({id:@e.EmployeeId,name:"@Html.Raw(e.FullName.Replace("\"","\\\""))"});
-}}
+if(SERVICES_LIST) {
+    SERVICES_LIST.forEach(s => { SERVICES[s.id] = s; });
+}
 
-// Orders state: array of {items:[], customerId, customerName, customerPhone, customerPoints}
-var orders = [{items:[],customerId:0,customerName:'',customerPhone:'',customerPoints:0}];
+var EMPLOYEES = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(employees?.Select(e => new { id = e.EmployeeId, name = e.FullName })));
+
+// Orders state: array of {items:[], customerId, customerName, customerPhone, customerPoints, employeeId1, employeeId2}
+function createEmptyOrder() {
+    return { items: [], customerId: 0, customerName: '', customerPhone: '', customerPoints: 0, employeeId1: 0, employeeId2: 0 };
+}
+
+// Load from LocalStorage or init
+var saved = localStorage.getItem('pos_orders');
+var orders = saved ? JSON.parse(saved) : [createEmptyOrder()];
 var currentOrder = 0;
-var orderCounter = 1;
+var orderCounter = orders.length;
+
+function saveOrders(){
+    localStorage.setItem('pos_orders', JSON.stringify(orders));
+}
 
 function empOptions(){
     var h='<option value="0">-- NV --</option>';
@@ -213,28 +239,83 @@ function addToOrder(svcId){
     var svc = SERVICES[svcId]; if(!svc) return;
     var o = orders[currentOrder];
     var existing = o.items.find(i=>i.serviceId===svcId);
-    if(existing){existing.qty++;} else {o.items.push({serviceId:svcId,name:svc.name,price:svc.price,qty:1,employeeId:0});}
+    if(existing){existing.qty++;} else {o.items.push({serviceId:svcId,name:svc.name,price:svc.price,qty:1,employeeId:o.employeeId1 || 0});}
     renderOrder();
+    saveOrders();
 }
 
 function renderOrder(){
     var o = orders[currentOrder];
     var el = document.getElementById('orderItems');
-    if(!o.items.length){el.innerHTML='<div class="empty-state" id="emptyOrder"><i class="bi bi-cart3"></i>Chọn dịch vụ bên trái</div>';calcTotal();return;}
+    var header = document.getElementById('orderHeader');
+    var footer = document.getElementById('orderFooter');
+    
+    if(!o.items || o.items.length === 0){
+        el.innerHTML='<div class="empty-state" id="emptyOrder"><i class="bi bi-cart3"></i>Chọn dịch vụ bên trái</div>';
+        if(header) header.style.display = 'none';
+        if(footer) footer.style.display = 'none';
+        calcTotal();
+        return;
+    }
+    
+    if(header) header.style.display = 'block';
+    if(footer) footer.style.display = 'block';
+    
+    // Build dynamic employee options to prevent duplicates
+    updateEmpOptions();
+    
     var h='';
     o.items.forEach((item,i)=>{
         h+=`<div class="order-item">
             <span class="item-remove" onclick="removeItem(${i})"><i class="bi bi-x"></i></span>
-            <div class="item-info"><div class="item-name">${item.name}</div>
-            <select onchange="setEmp(${i},this.value)" class="mt-1">${empOptions().replace('value="'+item.employeeId+'"','value="'+item.employeeId+'" selected')}</select></div>
+            <div class="item-info"><div class="item-name">${item.name}</div></div>
             <div class="item-qty"><input type="number" value="${item.qty}" min="1" onchange="setQty(${i},this.value)"/></div>
             <div class="item-total">${(item.price*item.qty).toLocaleString('vi-VN')}đ</div></div>`;
     });
-    el.innerHTML=h;calcTotal();
+    el.innerHTML=h;
+    calcTotal();
 }
 
-function removeItem(i){orders[currentOrder].items.splice(i,1);renderOrder();}
-function setQty(i,v){orders[currentOrder].items[i].qty=Math.max(1,parseInt(v)||1);renderOrder();}
+function updateEmpOptions(){
+    var o = orders[currentOrder];
+    var e1 = document.getElementById('mainEmp1');
+    var e2 = document.getElementById('mainEmp2');
+    if(!e1 || !e2) return;
+
+    var val1 = o.employeeId1 || 0;
+    var val2 = o.employeeId2 || 0;
+
+    var h1 = '<option value="0">-- Chọn thợ chính --</option>';
+    var h2 = '<option value="0">-- Chọn thợ phụ --</option>';
+
+    EMPLOYEES.forEach(e => {
+        if(e.id != val2) h1 += `<option value="${e.id}" ${e.id == val1 ? 'selected' : ''}>${e.name}</option>`;
+        if(e.id != val1) h2 += `<option value="${e.id}" ${e.id == val2 ? 'selected' : ''}>${e.name}</option>`;
+    });
+
+    e1.innerHTML = h1;
+    e2.innerHTML = h2;
+}
+
+function syncGlobalEmp(type, val){
+    var o = orders[currentOrder];
+    var id = parseInt(val);
+    
+    if(type === 1) o.employeeId1 = id;
+    else o.employeeId2 = id;
+    
+    // Auto-assign primary emp to all items for the backend
+    if(o.employeeId1 > 0) {
+        o.items.forEach(item => { item.employeeId = o.employeeId1; });
+    }
+    
+    updateEmpOptions();
+    calcTotal();
+    saveOrders();
+}
+
+function removeItem(i){orders[currentOrder].items.splice(i,1);renderOrder();saveOrders();}
+function setQty(i,v){orders[currentOrder].items[i].qty=Math.max(1,parseInt(v)||1);renderOrder();saveOrders();}
 function setEmp(i,v){orders[currentOrder].items[i].employeeId=parseInt(v);}
 
 function calcTotal(){
@@ -249,7 +330,9 @@ function calcTotal(){
     document.getElementById('finalAmount').textContent=final_.toLocaleString('vi-VN')+'đ';
     if(disc>0){document.getElementById('discountRow').style.display='flex';document.getElementById('discountAmount').textContent='-'+disc.toLocaleString('vi-VN')+'đ';}
     else{document.getElementById('discountRow').style.display='none';}
-    document.getElementById('btnPay').disabled=!(o.customerId>0 && o.items.length>0 && o.items.every(i=>i.employeeId>0));
+    
+    // Enable checkout if customer selected and at least one primary employee set
+    document.getElementById('btnPay').disabled=!(o.customerId>0 && o.items.length>0 && o.employeeId1 > 0);
 }
 
 // Customer search
@@ -274,11 +357,13 @@ function selectCustomer(id,name,phone,pts){
     document.getElementById('custSelected').style.display='block';document.getElementById('custNotFound').style.display='none';
     document.getElementById('custName').textContent=name;document.getElementById('custPhone').textContent=phone;document.getElementById('custPoints').textContent=pts;
     document.getElementById('pointsUse').max=pts;calcTotal();
+    saveOrders();
 }
 
 function clearCustomer(){
     var o=orders[currentOrder];o.customerId=0;o.customerName='';o.customerPhone='';o.customerPoints=0;
     document.getElementById('custSelected').style.display='none';document.getElementById('custSearch').value='';calcTotal();
+    saveOrders();
 }
 
 function quickAddCustomer(){
@@ -314,9 +399,9 @@ function switchOrder(i){
     document.getElementById('pointsUse').value=0;calcTotal();
 }
 
-function addNewOrder(){orders.push({items:[],customerId:0,customerName:'',customerPhone:'',customerPoints:0});orderCounter++;switchOrder(orders.length-1);renderTabs();}
+function addNewOrder(){orders.push(createEmptyOrder());orderCounter++;switchOrder(orders.length-1);renderTabs();saveOrders();}
 
-function closeOrder(i){if(orders.length<=1)return;orders.splice(i,1);if(currentOrder>=orders.length)currentOrder=orders.length-1;switchOrder(currentOrder);renderTabs();}
+function closeOrder(i){if(orders.length<=1)return;orders.splice(i,1);if(currentOrder>=orders.length)currentOrder=orders.length-1;switchOrder(currentOrder);renderTabs();saveOrders();}
 
 // Checkout
 function doCheckout(){
@@ -324,7 +409,10 @@ function doCheckout(){
     if(!o.items.every(i=>i.employeeId>0)){alert('Vui lòng chọn nhân viên cho mỗi dịch vụ!');return;}
     var body=new URLSearchParams();
     body.append('customerId',o.customerId);body.append('paymentMethod',document.getElementById('payMethod').value);
-    body.append('pointsToUse',document.getElementById('pointsUse').value||0);body.append('notes','');
+    body.append('pointsToUse',document.getElementById('pointsUse').value||0);
+    // Include 2nd employee in notes if exists
+    var notes = o.employeeId2 > 0 ? "Thợ phụ: " + EMPLOYEES.find(e=>e.id==o.employeeId2)?.name : "";
+    body.append('notes', notes);
     o.items.forEach(item=>{body.append('serviceIds',item.serviceId);body.append('employeeIds',item.employeeId);body.append('quantities',item.qty);});
     document.getElementById('btnPay').disabled=true;
     fetch('/Pos/Checkout',{method:'POST',body:body}).then(r=>r.json()).then(d=>{
@@ -342,8 +430,9 @@ function doCheckout(){
 function afterPayment(){
     var i=window._paidOrderIdx;
     if(orders.length>1){orders.splice(i,1);if(currentOrder>=orders.length)currentOrder=orders.length-1;}
-    else{orders[0]={items:[],customerId:0,customerName:'',customerPhone:'',customerPoints:0};}
+    else{orders[0]=createEmptyOrder();}
     switchOrder(currentOrder);renderTabs();
+    saveOrders();
 }
 
 // Service search filter

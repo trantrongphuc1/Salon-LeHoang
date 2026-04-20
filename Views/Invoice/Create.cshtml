@@ -115,23 +115,28 @@
 
 @section Scripts {
     <script>
-        var servicesData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(services?.Select(s => new { s.ServiceId, s.ServiceName, s.Price })));
-        var employeesData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(employees?.Select(e => new { e.EmployeeId, e.FullName })));
+        var servicesData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(services?.Select(s => new { serviceId = s.ServiceId, serviceName = s.ServiceName, price = s.Price })));
+        var employeesData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(employees?.Select(e => new { employeeId = e.EmployeeId, fullName = e.FullName })));
 
         function addServiceRow() {
-            document.getElementById('emptyMessage').style.display = 'none';
+            var emptyMsg = document.getElementById('emptyMessage');
+            if(emptyMsg) emptyMsg.style.display = 'none';
             var tbody = document.getElementById('serviceBody');
             var idx = tbody.children.length;
 
             var serviceOptions = '<option value="">-- Chọn --</option>';
-            servicesData.forEach(s => {
-                serviceOptions += `<option value="${s.serviceId}" data-price="${s.price}">${s.serviceName} — ${Number(s.price).toLocaleString('vi-VN')}đ</option>`;
-            });
+            if(servicesData) {
+                servicesData.forEach(s => {
+                    serviceOptions += `<option value="${s.serviceId}" data-price="${s.price}">${s.serviceName} — ${Number(s.price).toLocaleString('vi-VN')}đ</option>`;
+                });
+            }
 
             var empOptions = '<option value="">-- Chọn --</option>';
-            employeesData.forEach(e => {
-                empOptions += `<option value="${e.employeeId}">${e.fullName}</option>`;
-            });
+            if(employeesData) {
+                employeesData.forEach(e => {
+                    empOptions += `<option value="${e.employeeId}">${e.fullName}</option>`;
+                });
+            }
 
             var row = document.createElement('tr');
             row.innerHTML = `

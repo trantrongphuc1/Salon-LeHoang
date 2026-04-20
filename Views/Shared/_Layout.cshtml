@@ -341,6 +341,32 @@
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; }
         ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
+        /* Submenu */
+        .sidebar-link[data-bs-toggle="collapse"] {
+            position: relative;
+        }
+
+        .sidebar-link[data-bs-toggle="collapse"]::after {
+            display: none;
+        }
+
+        .sidebar-link .chevron-icon {
+            transition: transform 0.3s ease;
+            font-size: 0.8rem;
+        }
+
+        .sidebar-link[aria-expanded="true"] .chevron-icon {
+            transform: rotate(180deg);
+        }
+
+        .submenu-container {
+            padding-left: 1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .sidebar-link.active {
+            position: relative;
+        }
     </style>
 </head>
 <body>
@@ -352,39 +378,67 @@
         </a>
 
         <nav class="sidebar-nav">
-            <div class="nav-section-title">Tổng quan</div>
+            <!-- Dashboard -->
             <a class="sidebar-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Admin" ? "active" : "")"
                asp-controller="Admin" asp-action="Index">
                 <i class="bi bi-grid-1x2-fill"></i> Dashboard
             </a>
 
-            <div class="nav-section-title">Quản lý</div>
-            <a class="sidebar-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Service" ? "active" : "")"
-               asp-controller="Service" asp-action="Index">
-                <i class="bi bi-stars"></i> Dịch vụ
-            </a>
-            <a class="sidebar-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Customer" ? "active" : "")"
-               asp-controller="Customer" asp-action="Index">
-                <i class="bi bi-people-fill"></i> Khách hàng
-            </a>
-            <a class="sidebar-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Employee" ? "active" : "")"
-               asp-controller="Employee" asp-action="Index">
-                <i class="bi bi-person-badge-fill"></i> Nhân viên
+            <!-- POS Link -->
+            <a class="sidebar-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Pos" ? "active" : "")"
+               asp-controller="Pos" asp-action="Index">
+                <i class="bi bi-cart-plus-fill"></i> Bán hàng (POS)
             </a>
 
-            <div class="nav-section-title">Tài chính</div>
-            <a class="sidebar-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Invoice" ? "active" : "")"
-               asp-controller="Invoice" asp-action="Index">
-                <i class="bi bi-receipt-cutoff"></i> Hóa đơn
+            <!-- Management Section -->
+            <a class="sidebar-link @(new[] {"Service", "Customer", "Employee"}.Contains(ViewContext.RouteData.Values["controller"]?.ToString()) ? "" : "collapsed")" 
+               data-bs-toggle="collapse" href="#manageSubmenu" role="button" 
+               aria-expanded="@(new[] {"Service", "Customer", "Employee"}.Contains(ViewContext.RouteData.Values["controller"]?.ToString()) ? "true" : "false")">
+                <i class="bi bi-layers-fill"></i> Quản lý
+                <i class="bi bi-chevron-down ms-auto chevron-icon"></i>
             </a>
-            <a class="sidebar-link @(ViewContext.RouteData.Values["action"]?.ToString() == "Attendance" ? "active" : "")"
-               asp-controller="Employee" asp-action="Attendance">
-                <i class="bi bi-calendar-check-fill"></i> Chấm công
+            
+            <div class="collapse @(new[] {"Service", "Customer", "Employee"}.Contains(ViewContext.RouteData.Values["controller"]?.ToString()) ? "show" : "")" id="manageSubmenu">
+                <div class="submenu-container">
+                    <a class="sidebar-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Service" ? "active" : "")"
+                       asp-controller="Service" asp-action="Index">
+                        <i class="bi bi-stars"></i> Dịch vụ
+                    </a>
+                    <a class="sidebar-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Customer" ? "active" : "")"
+                       asp-controller="Customer" asp-action="Index">
+                        <i class="bi bi-people-fill"></i> Khách hàng
+                    </a>
+                    <a class="sidebar-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Employee" ? "active" : "")"
+                       asp-controller="Employee" asp-action="Index">
+                        <i class="bi bi-person-badge-fill"></i> Nhân viên
+                    </a>
+                </div>
+            </div>
+
+            <!-- Finance Section -->
+            <a class="sidebar-link @(new[] {"Invoice", "Attendance", "Payroll"}.Contains(ViewContext.RouteData.Values["controller"]?.ToString()) || new[] {"Attendance", "Payroll"}.Contains(ViewContext.RouteData.Values["action"]?.ToString()) ? "" : "collapsed")" 
+               data-bs-toggle="collapse" href="#financeSubmenu" role="button" 
+               aria-expanded="@(new[] {"Invoice", "Attendance", "Payroll"}.Contains(ViewContext.RouteData.Values["controller"]?.ToString()) || new[] {"Attendance", "Payroll"}.Contains(ViewContext.RouteData.Values["action"]?.ToString()) ? "true" : "false")">
+                <i class="bi bi-wallet2"></i> Tài chính
+                <i class="bi bi-chevron-down ms-auto chevron-icon"></i>
             </a>
-            <a class="sidebar-link @(ViewContext.RouteData.Values["action"]?.ToString() == "Payroll" ? "active" : "")"
-               asp-controller="Employee" asp-action="Payroll">
-                <i class="bi bi-cash-stack"></i> Bảng lương
-            </a>
+
+            <div class="collapse @(new[] {"Invoice", "Attendance", "Payroll"}.Contains(ViewContext.RouteData.Values["controller"]?.ToString()) || new[] {"Attendance", "Payroll"}.Contains(ViewContext.RouteData.Values["action"]?.ToString()) ? "show" : "")" id="financeSubmenu">
+                <div class="submenu-container">
+                    <a class="sidebar-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Invoice" ? "active" : "")"
+                       asp-controller="Invoice" asp-action="Index">
+                        <i class="bi bi-receipt-cutoff"></i> Hóa đơn
+                    </a>
+                    <a class="sidebar-link @(ViewContext.RouteData.Values["action"]?.ToString() == "Attendance" ? "active" : "")"
+                       asp-controller="Employee" asp-action="Attendance">
+                        <i class="bi bi-calendar-check-fill"></i> Chấm công
+                    </a>
+                    <a class="sidebar-link @(ViewContext.RouteData.Values["action"]?.ToString() == "Payroll" ? "active" : "")"
+                       asp-controller="Employee" asp-action="Payroll">
+                        <i class="bi bi-cash-stack"></i> Bảng lương
+                    </a>
+                </div>
+            </div>
         </nav>
 
         <div class="sidebar-footer">

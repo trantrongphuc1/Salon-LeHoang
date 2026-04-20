@@ -24,6 +24,17 @@ namespace Salon_LeHoang.Controllers
             return View(employees);
         }
 
+        public async Task<IActionResult> Details(int id)
+        {
+            var employee = await _context.Employees
+                .Include(e => e.InvoiceDetails).ThenInclude(d => d.Service)
+                .Include(e => e.InvoiceDetails).ThenInclude(d => d.Invoice).ThenInclude(i => i.Customer)
+                .FirstOrDefaultAsync(e => e.EmployeeId == id);
+
+            if (employee == null) return NotFound();
+            return View(employee);
+        }
+
         public IActionResult Create()
         {
             return View();
@@ -107,7 +118,9 @@ namespace Salon_LeHoang.Controllers
                     {
                         Employee = emp,
                         DaysOff = att?.DaysOff ?? 0,
-                        Notes = att?.Notes
+                        LateDays = att?.LateDays ?? 0,
+                        Notes = att?.Notes,
+                        LateNotes = att?.LateNotes
                     };
                 }).ToList()
             };
@@ -116,9 +129,10 @@ namespace Salon_LeHoang.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> UpdateAttendance(int employeeId, int month, int year, int daysOff, string? notes)
+        public async Task<IActionResult> UpdateAttendance(int employeeId, int month, int year, int daysOff, int lateDays, string? notes, string? lateNotes)
         {
             if (daysOff < 0) daysOff = 0;
+            if (lateDays < 0) lateDays = 0;
 
             var attendance = await _context.Attendances
                 .FirstOrDefaultAsync(a => a.EmployeeId == employeeId && a.AttendanceMonth == month && a.AttendanceYear == year);
@@ -131,7 +145,9 @@ namespace Salon_LeHoang.Controllers
                     AttendanceMonth = month,
                     AttendanceYear = year,
                     DaysOff = daysOff,
+                    LateDays = lateDays,
                     Notes = notes,
+                    LateNotes = lateNotes,
                     CreatedAt = DateTime.Now
                 };
                 _context.Attendances.Add(attendance);
@@ -139,7 +155,9 @@ namespace Salon_LeHoang.Controllers
             else
             {
                 attendance.DaysOff = daysOff;
+                attendance.LateDays = lateDays;
                 attendance.Notes = notes;
+                attendance.LateNotes = lateNotes;
             }
 
             await _context.SaveChangesAsync();
@@ -182,8 +200,10 @@ namespace Salon_LeHoang.Controllers
                     {
                         Employee = emp,
                         DaysOff = att?.DaysOff ?? 0,
+                        LateDays = att?.LateDays ?? 0,
                         TotalInvoiceAmount = invoiceTotal,
-                        AttendanceNotes = att?.Notes
+                        AttendanceNotes = att?.Notes,
+                        LateNotes = att?.LateNotes
                     };
                 }).ToList()
             };
@@ -219,8 +239,10 @@ namespace Salon_LeHoang.Controllers
             {
                 Employee = employee,
                 DaysOff = att?.DaysOff ?? 0,
+                LateDays = att?.LateDays ?? 0,
                 TotalInvoiceAmount = totalInvoiceAmount,
-                AttendanceNotes = att?.Notes
+                AttendanceNotes = att?.Notes,
+                LateNotes = att?.LateNotes
             };
 
             ViewBag.InvoiceDetails = invoiceDetails;

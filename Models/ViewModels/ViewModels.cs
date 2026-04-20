@@ -29,7 +29,25 @@ public class DashboardViewModel
     public int TotalServices { get; set; }
     public decimal MonthRevenue { get; set; }
     public int MonthInvoiceCount { get; set; }
+    public decimal YearRevenue { get; set; }
     public List<Invoice> RecentInvoices { get; set; } = new List<Invoice>();
+    public List<TopServiceViewModel> TopServices { get; set; } = new List<TopServiceViewModel>();
+    public List<TopCustomerViewModel> TopCustomers { get; set; } = new List<TopCustomerViewModel>();
+}
+
+public class TopServiceViewModel
+{
+    public string ServiceName { get; set; } = "";
+    public int UsageCount { get; set; }
+    public decimal TotalRevenue { get; set; }
+}
+
+public class TopCustomerViewModel
+{
+    public string FullName { get; set; } = "";
+    public string PhoneNumber { get; set; } = "";
+    public int InvoiceCount { get; set; }
+    public decimal TotalSpent { get; set; }
 }
 
 public class PayrollViewModel
@@ -43,6 +61,7 @@ public class EmployeePayrollItem
 {
     public Employee Employee { get; set; } = null!;
     public int DaysOff { get; set; }
+    public int LateDays { get; set; }
     public int AllowedDaysOff { get; set; } = 2;
     public int ExcessDaysOff => DaysOff > AllowedDaysOff ? DaysOff - AllowedDaysOff : 0;
     public int StandardWorkDays { get; set; } = 28;
@@ -54,6 +73,8 @@ public class EmployeePayrollItem
     public decimal CommissionEarned => TotalInvoiceAmount * Employee.CommissionRate / 100;
     public decimal TotalSalary => BaseSalaryEarned + CommissionEarned;
     public string? AttendanceNotes { get; set; }
+    public string? LateNotes { get; set; }
+    public bool IsViolation => DaysOff > 2 || LateDays > 5;
 }
 
 public class AttendanceViewModel
@@ -67,6 +88,8 @@ public class EmployeeAttendanceItem
 {
     public Employee Employee { get; set; } = null!;
     public int DaysOff { get; set; }
+    public int LateDays { get; set; }
     public string? Notes { get; set; }
-    public bool IsViolation => DaysOff > 2;
+    public string? LateNotes { get; set; }
+    public bool IsViolation => DaysOff > 2 || LateDays > 5;
 }

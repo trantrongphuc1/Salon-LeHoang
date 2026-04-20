@@ -44,7 +44,7 @@
                         <th>Nhân viên</th>
                         <th>Lương CB</th>
                         <th>Ngày nghỉ</th>
-                        <th>Ngày vượt</th>
+                        <th>Ngày trễ</th>
                         <th>Lương theo công</th>
                         <th>Doanh thu HĐ</th>
                         <th>Hoa hồng (%)</th>
@@ -63,22 +63,11 @@
                         <tr>
                             <td class="fw-semibold">@item.Employee.FullName</td>
                             <td>@String.Format("{0:N0}đ", item.Employee.BaseSalary)</td>
-                            <td>
+                            <td class="@(item.ExcessDaysOff > 0 ? "text-danger fw-bold" : "")">
                                 @item.DaysOff ngày
-                                @if (item.ExcessDaysOff > 0)
-                                {
-                                    <span class="badge badge-violation ms-1">Vi phạm</span>
-                                }
                             </td>
-                            <td class="@(item.ExcessDaysOff > 0 ? "text-danger fw-bold" : "text-success")">
-                                @if (item.ExcessDaysOff > 0)
-                                {
-                                    @:@item.ExcessDaysOff ngày
-                                }
-                                else
-                                {
-                                    @:0
-                                }
+                            <td class="@(item.LateDays > 5 ? "text-danger fw-bold" : "")">
+                                @item.LateDays ngày
                             </td>
                             <td class="fw-semibold">@String.Format("{0:N0}đ", item.BaseSalaryEarned)</td>
                             <td>@String.Format("{0:N0}đ", item.TotalInvoiceAmount)</td>

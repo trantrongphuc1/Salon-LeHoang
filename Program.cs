@@ -37,7 +37,7 @@ app.UseAuthorization();
 
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Auth}/{action=Login}/{id?}");
+    pattern: "{controller=Admin}/{action=Index}/{id?}");
 
 // Tự động tạo tài khoản Admin mặc định nếu chưa có
 using (var scope = app.Services.CreateScope())

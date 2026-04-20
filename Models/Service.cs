@@ -7,6 +7,8 @@ public partial class Service
 {
     public int ServiceId { get; set; }
 
+    public string? ServiceCode { get; set; }
+
     public string ServiceName { get; set; } = null!;
 
     public string? Description { get; set; }

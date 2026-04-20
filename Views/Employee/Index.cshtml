@@ -29,7 +29,9 @@
                     {
                         <tr class="@(!e.IsActive ? "opacity-50" : "")">
                             <td>#@e.EmployeeId</td>
-                            <td class="fw-semibold">@e.FullName</td>
+                            <td class="fw-semibold">
+                                <a asp-action="Details" asp-route-id="@e.EmployeeId" class="text-decoration-none" style="color:var(--gold);">@e.FullName</a>
+                            </td>
                             <td>@(e.PhoneNumber ?? "—")</td>
                             <td>@(e.Position ?? "—")</td>
                             <td class="fw-bold" style="color:var(--gold);">@String.Format("{0:N0}đ", e.BaseSalary)</td>

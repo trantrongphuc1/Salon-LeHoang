@@ -41,6 +41,12 @@
                             }
                         </td>
                     </tr>
+                    <tr>
+                        <td class="text-muted">Ngày trễ:</td>
+                        <td>
+                            @Model.LateDays ngày
+                        </td>
+                    </tr>
                     <tr><td class="text-muted">Ngày công thực tế:</td><td>@Model.ActualWorkDays / 28 ngày</td></tr>
                     <tr><td class="text-muted">Lương theo công:</td><td class="fw-semibold">@String.Format("{0:N0}đ", Model.BaseSalaryEarned)</td></tr>
                     <tr><td class="text-muted">Doanh thu HĐ:</td><td>@String.Format("{0:N0}đ", Model.TotalInvoiceAmount)</td></tr>
@@ -54,12 +60,21 @@
                     <span class="fw-bold fs-4" style="color:var(--gold);">@String.Format("{0:N0}đ", Model.TotalSalary)</span>
                 </div>
 
-                @if (!string.IsNullOrEmpty(Model.AttendanceNotes))
+                @if (!string.IsNullOrEmpty(Model.AttendanceNotes) || !string.IsNullOrEmpty(Model.LateNotes))
                 {
                     <hr style="border-color:var(--border-color);" />
-                    <div class="small text-muted">
-                        <strong>Ghi chú nghỉ:</strong> @Model.AttendanceNotes
-                    </div>
+                    @if (!string.IsNullOrEmpty(Model.AttendanceNotes))
+                    {
+                        <div class="small text-muted mb-1">
+                            <strong>Ghi chú nghỉ:</strong> @Model.AttendanceNotes
+                        </div>
+                    }
+                    @if (!string.IsNullOrEmpty(Model.LateNotes))
+                    {
+                        <div class="small text-muted">
+                            <strong>Ghi chú trễ:</strong> @Model.LateNotes
+                        </div>
+                    }
                 }
             </div>
         </div>

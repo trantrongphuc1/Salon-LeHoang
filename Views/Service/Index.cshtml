@@ -37,7 +37,7 @@
                     @foreach (var s in Model)
                     {
                         <tr class="@(!s.IsActive ? "opacity-50" : "")">
-                            <td>#@s.ServiceId</td>
+                            <td>@(string.IsNullOrEmpty(s.ServiceCode) ? "#" + s.ServiceId : s.ServiceCode)</td>
                             <td class="fw-semibold">@s.ServiceName</td>
                             <td class="text-muted" style="max-width:200px;">
                                 <span class="text-truncate d-inline-block" style="max-width:200px;">@(s.Description ?? "—")</span>

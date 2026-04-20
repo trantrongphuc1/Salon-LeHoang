@@ -22,10 +22,15 @@ namespace Salon_LeHoang.Controllers
                 .OrderBy(s => s.ServiceName)
                 .ToListAsync();
 
-            ViewBag.Employees = await _context.Employees
+            var employees = await _context.Employees
                 .Where(e => e.IsActive)
                 .OrderBy(e => e.FullName)
                 .ToListAsync();
+
+            ViewBag.Employees = employees;
+
+            ViewBag.EmployeeOptions = "<option value='0'>-- Chọn thợ --</option>" + 
+                string.Join("", employees.Select(e => $"<option value='{e.EmployeeId}'>{e.FullName}</option>"));
 
             return View();
         }
