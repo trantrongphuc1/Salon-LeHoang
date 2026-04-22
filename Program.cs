@@ -39,26 +39,13 @@ app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Admin}/{action=Index}/{id?}");
 
-// Tự động tạo tài khoản Admin mặc định nếu chưa có
+// Tự động tạo dữ liệu mẫu
 using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<Salon_LeHoang.Models.SalonLeHoangContext>();
     try 
     {
-        if (!context.Users.Any(u => u.Role == "Admin"))
-        {
-            context.Users.Add(new Salon_LeHoang.Models.User
-            {
-                FullName = "Administrator",
-                PhoneNumber = "admin", // Tên đăng nhập
-                PasswordHash = "admin123", // Mật khẩu
-                Role = "Admin",
-                Points = 0,
-                IsActive = true,
-                CreatedAt = DateTime.Now
-            });
-            context.SaveChanges();
-        }
+        Salon_LeHoang.Models.DataSeeder.Seed(context);
     }
     catch 
     { 

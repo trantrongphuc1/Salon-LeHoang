@@ -1,7 +1,5 @@
 is_global = true
 build_property.TargetFramework = net8.0
-build_property.TargetFrameworkIdentifier = .NETCoreApp
-build_property.TargetFrameworkVersion = v8.0
 build_property.TargetPlatformMinVersion = 
 build_property.UsingMicrosoftNETSdkWeb = true
 build_property.ProjectTypeGuids = 
@@ -11,117 +9,117 @@ build_property.EnforceExtendedAnalyzerRules =
 build_property._SupportedPlatformList = Linux,macOS,Windows
 build_property.RootNamespace = Salon_LeHoang
 build_property.RootNamespace = Salon_LeHoang
-build_property.ProjectDir = D:\Salon-LeHoang\
+build_property.ProjectDir = D:\Salon LeHoang\Salon LeHoang\
 build_property.EnableComHosting = 
 build_property.EnableGeneratedComInterfaceComImportInterop = 
 build_property.RazorLangVersion = 8.0
 build_property.SupportLocalizedComponentNames = 
 build_property.GenerateRazorMetadataSourceChecksumAttributes = 
-build_property.MSBuildProjectDirectory = D:\Salon-LeHoang
+build_property.MSBuildProjectDirectory = D:\Salon LeHoang\Salon LeHoang
 build_property._RazorSourceGeneratorDebug = 
 build_property.EffectiveAnalysisLevelStyle = 8.0
 build_property.EnableCodeStyleSeverity = 
 
-[D:/Salon-LeHoang/Views/Admin/Index.cshtml]
+[D:/Salon LeHoang/Salon LeHoang/Views/Admin/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWRtaW5cSW5kZXguY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[D:/Salon-LeHoang/Views/Auth/Login.cshtml]
+[D:/Salon LeHoang/Salon LeHoang/Views/Auth/Login.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQXV0aFxMb2dpbi5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[D:/Salon-LeHoang/Views/Customer/Create.cshtml]
+[D:/Salon LeHoang/Salon LeHoang/Views/Customer/Create.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQ3VzdG9tZXJcQ3JlYXRlLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[D:/Salon-LeHoang/Views/Customer/Details.cshtml]
+[D:/Salon LeHoang/Salon LeHoang/Views/Customer/Details.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQ3VzdG9tZXJcRGV0YWlscy5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[D:/Salon-LeHoang/Views/Customer/Edit.cshtml]
+[D:/Salon LeHoang/Salon LeHoang/Views/Customer/Edit.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQ3VzdG9tZXJcRWRpdC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[D:/Salon-LeHoang/Views/Customer/Index.cshtml]
+[D:/Salon LeHoang/Salon LeHoang/Views/Customer/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQ3VzdG9tZXJcSW5kZXguY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[D:/Salon-LeHoang/Views/Employee/Attendance.cshtml]
+[D:/Salon LeHoang/Salon LeHoang/Views/Employee/Attendance.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRW1wbG95ZWVcQXR0ZW5kYW5jZS5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[D:/Salon-LeHoang/Views/Employee/Create.cshtml]
+[D:/Salon LeHoang/Salon LeHoang/Views/Employee/Create.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRW1wbG95ZWVcQ3JlYXRlLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[D:/Salon-LeHoang/Views/Employee/Details.cshtml]
+[D:/Salon LeHoang/Salon LeHoang/Views/Employee/Details.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRW1wbG95ZWVcRGV0YWlscy5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[D:/Salon-LeHoang/Views/Employee/Edit.cshtml]
+[D:/Salon LeHoang/Salon LeHoang/Views/Employee/Edit.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRW1wbG95ZWVcRWRpdC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[D:/Salon-LeHoang/Views/Employee/Index.cshtml]
+[D:/Salon LeHoang/Salon LeHoang/Views/Employee/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRW1wbG95ZWVcSW5kZXguY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[D:/Salon-LeHoang/Views/Employee/Payroll.cshtml]
+[D:/Salon LeHoang/Salon LeHoang/Views/Employee/Payroll.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRW1wbG95ZWVcUGF5cm9sbC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[D:/Salon-LeHoang/Views/Employee/PayrollDetail.cshtml]
+[D:/Salon LeHoang/Salon LeHoang/Views/Employee/PayrollDetail.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRW1wbG95ZWVcUGF5cm9sbERldGFpbC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[D:/Salon-LeHoang/Views/Invoice/Create.cshtml]
+[D:/Salon LeHoang/Salon LeHoang/Views/Invoice/Create.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSW52b2ljZVxDcmVhdGUuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[D:/Salon-LeHoang/Views/Invoice/Details.cshtml]
+[D:/Salon LeHoang/Salon LeHoang/Views/Invoice/Details.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSW52b2ljZVxEZXRhaWxzLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[D:/Salon-LeHoang/Views/Invoice/Index.cshtml]
+[D:/Salon LeHoang/Salon LeHoang/Views/Invoice/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSW52b2ljZVxJbmRleC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[D:/Salon-LeHoang/Views/Invoice/Print.cshtml]
+[D:/Salon LeHoang/Salon LeHoang/Views/Invoice/Print.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSW52b2ljZVxQcmludC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[D:/Salon-LeHoang/Views/Pos/Index.cshtml]
+[D:/Salon LeHoang/Salon LeHoang/Views/Pos/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUG9zXEluZGV4LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[D:/Salon-LeHoang/Views/Service/Create.cshtml]
+[D:/Salon LeHoang/Salon LeHoang/Views/Service/Create.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2VydmljZVxDcmVhdGUuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[D:/Salon-LeHoang/Views/Service/Edit.cshtml]
+[D:/Salon LeHoang/Salon LeHoang/Views/Service/Edit.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2VydmljZVxFZGl0LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[D:/Salon-LeHoang/Views/Service/Index.cshtml]
+[D:/Salon LeHoang/Salon LeHoang/Views/Service/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2VydmljZVxJbmRleC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[D:/Salon-LeHoang/Views/Shared/Error.cshtml]
+[D:/Salon LeHoang/Salon LeHoang/Views/Shared/Error.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXEVycm9yLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[D:/Salon-LeHoang/Views/Shared/_ValidationScriptsPartial.cshtml]
+[D:/Salon LeHoang/Salon LeHoang/Views/Shared/_ValidationScriptsPartial.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXF9WYWxpZGF0aW9uU2NyaXB0c1BhcnRpYWwuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[D:/Salon-LeHoang/Views/_ViewImports.cshtml]
+[D:/Salon LeHoang/Salon LeHoang/Views/_ViewImports.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcX1ZpZXdJbXBvcnRzLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[D:/Salon-LeHoang/Views/_ViewStart.cshtml]
+[D:/Salon LeHoang/Salon LeHoang/Views/_ViewStart.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcX1ZpZXdTdGFydC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[D:/Salon-LeHoang/Views/Shared/_Layout.cshtml]
+[D:/Salon LeHoang/Salon LeHoang/Views/Shared/_Layout.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXF9MYXlvdXQuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = b-8lrw6nyflc

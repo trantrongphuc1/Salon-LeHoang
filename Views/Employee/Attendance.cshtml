@@ -57,34 +57,37 @@
                     @foreach (var item in Model.Items)
                     {
                         <tr>
-                            <td class="fw-semibold">@item.Employee.FullName</td>
-                            <td class="text-muted">@(item.Employee.Position ?? "—")</td>
-                            <td colspan="5">
-                                <form asp-action="UpdateAttendance" method="post" class="d-flex gap-2 align-items-center flex-wrap">
+                            <td class="fw-semibold">
+                                <form asp-action="UpdateAttendance" method="post" id="form-@item.Employee.EmployeeId">
                                     <input type="hidden" name="employeeId" value="@item.Employee.EmployeeId" />
                                     <input type="hidden" name="month" value="@Model.Month" />
                                     <input type="hidden" name="year" value="@Model.Year" />
-                                    
-                                    <div class="d-flex align-items-center gap-1">
-                                        <input type="number" name="daysOff" value="@item.DaysOff" min="0" max="31" class="form-control form-control-sm" style="width:60px;" title="Ngày nghỉ" />
-                                        <input type="text" name="notes" value="@item.Notes" class="form-control form-control-sm" placeholder="Ghi chú nghỉ..." style="width:120px;" />
-                                    </div>
-
-                                    <div class="d-flex align-items-center gap-1">
-                                        <input type="number" name="lateDays" value="@item.LateDays" min="0" max="31" class="form-control form-control-sm" style="width:60px;" title="Ngày trễ" />
-                                        <input type="text" name="lateNotes" value="@item.LateNotes" class="form-control form-control-sm" placeholder="Ghi chú trễ..." style="width:120px;" />
-                                    </div>
-
-                                    <span class="flex-grow-1">
-                                        @if (item.IsViolation)
-                                        {
-                                            <span class="badge badge-violation">
-                                                <i class="bi bi-exclamation-triangle me-1"></i>Vi phạm nội quy
-                                            </span>
-                                        }
-                                    </span>
-                                    <button type="submit" class="btn btn-sm btn-gold text-nowrap"><i class="bi bi-save me-1"></i>Lưu</button>
                                 </form>
+                                @item.Employee.FullName
+                            </td>
+                            <td class="text-muted">@(item.Employee.Position ?? "—")</td>
+                            <td>
+                                <input type="number" form="form-@item.Employee.EmployeeId" name="daysOff" value="@item.DaysOff" min="0" max="31" class="form-control form-control-sm" style="width:70px;" title="Ngày nghỉ" />
+                            </td>
+                            <td>
+                                <input type="text" form="form-@item.Employee.EmployeeId" name="notes" value="@item.Notes" class="form-control form-control-sm" placeholder="Ghi chú nghỉ..." />
+                            </td>
+                            <td>
+                                <input type="number" form="form-@item.Employee.EmployeeId" name="lateDays" value="@item.LateDays" min="0" max="31" class="form-control form-control-sm" style="width:70px;" title="Ngày trễ" />
+                            </td>
+                            <td>
+                                <input type="text" form="form-@item.Employee.EmployeeId" name="lateNotes" value="@item.LateNotes" class="form-control form-control-sm" placeholder="Ghi chú trễ..." />
+                            </td>
+                            <td class="text-end">
+                                <div class="d-flex align-items-center justify-content-end gap-2">
+                                    @if (item.IsViolation)
+                                    {
+                                        <span class="badge badge-violation" title="Vi phạm nội quy">
+                                            <i class="bi bi-exclamation-triangle"></i>
+                                        </span>
+                                    }
+                                    <button type="submit" form="form-@item.Employee.EmployeeId" class="btn btn-sm btn-gold text-nowrap"><i class="bi bi-save me-1"></i>Lưu</button>
+                                </div>
                             </td>
                         </tr>
                     }

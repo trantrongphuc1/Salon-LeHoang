@@ -276,3 +276,4 @@ D:\Salon-LeHoang\obj\Debug\net8.0\refint\Salon LeHoang.dll
 D:\Salon-LeHoang\obj\Debug\net8.0\Salon LeHoang.pdb
 D:\Salon-LeHoang\obj\Debug\net8.0\Salon LeHoang.genruntimeconfig.cache
 D:\Salon-LeHoang\obj\Debug\net8.0\ref\Salon LeHoang.dll
+D:\Salon LeHoang\Salon LeHoang\obj\Debug\net8.0\Salon LeHoang.sourcelink.json
