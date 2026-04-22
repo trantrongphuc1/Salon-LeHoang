@@ -45,11 +45,15 @@ using (var scope = app.Services.CreateScope())
     var context = scope.ServiceProvider.GetRequiredService<Salon_LeHoang.Models.SalonLeHoangContext>();
     try 
     {
+        // Tự động chạy Migration để tạo database nếu chưa có
+        context.Database.Migrate();
+        
         Salon_LeHoang.Models.DataSeeder.Seed(context);
     }
-    catch 
+    catch (Exception ex)
     { 
-        // Bỏ qua lỗi nếu database chưa được tạo
+        // Log lỗi hoặc in ra console để dễ debug nếu có vấn đề
+        Console.WriteLine($"Lỗi khi khởi tạo database: {ex.Message}");
     }
 }
 
