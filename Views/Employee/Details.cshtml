@@ -27,15 +27,15 @@
                 <div class="small text-muted">
                     <div class="d-flex justify-content-between mb-1">
                         <span>Số điện thoại:</span>
-                        <span class="text-white">@Model.PhoneNumber</span>
+                        <span class="text-dark">@Model.PhoneNumber</span>
                     </div>
                     <div class="d-flex justify-content-between mb-1">
                         <span>Lương cơ bản:</span>
-                        <span class="text-white">@String.Format("{0:N0}đ", Model.BaseSalary)</span>
+                        <span class="text-dark">@String.Format("{0:N0}đ", Model.BaseSalary)</span>
                     </div>
                     <div class="d-flex justify-content-between mb-1">
                         <span>Ngày vào làm:</span>
-                        <span class="text-white">@Model.CreatedAt.ToString("dd/MM/yyyy")</span>
+                        <span class="text-dark">@Model.CreatedAt.ToString("dd/MM/yyyy")</span>
                     </div>
                     <div class="d-flex justify-content-between">
                         <span>Trạng thái:</span>
@@ -55,7 +55,7 @@
                     <h6 class="mb-0 fw-semibold"><i class="bi bi-receipt me-2" style="color:var(--gold);"></i>Lịch sử phục vụ gần đây</h6>
                 </div>
                 <div class="table-responsive">
-                    <table class="table table-dark table-custom mb-0">
+                    <table class="table table-custom mb-0">
                         <thead>
                             <tr>
                                 <th>Mã HĐ</th>
