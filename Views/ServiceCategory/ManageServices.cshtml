@@ -1,0 +1,93 @@
+@model IEnumerable<Salon_LeHoang.Models.Service>
+@{
+    var category = ViewBag.Category as Salon_LeHoang.Models.ServiceCategory;
+    ViewData["Title"] = "Quản lý dịch vụ - " + category.CategoryName;
+}
+
+<div class="animate-in">
+    <div class="d-flex align-items-center gap-2 mb-4">
+        <a asp-action="Index" class="btn btn-sm btn-outline-secondary"><i class="bi bi-arrow-left"></i></a>
+        <div>
+            <h4 class="fw-bold mb-0">Thêm dịch vụ vào danh mục</h4>
+            <span class="badge badge-gold fs-6">@category.CategoryName</span>
+        </div>
+    </div>
+
+    <div class="card-custom">
+        <form asp-action="ManageServices" method="post">
+            <input type="hidden" name="categoryId" value="@category.CategoryId" />
+            
+            <div class="p-4 border-bottom bg-light d-flex justify-content-between align-items-center">
+                <div class="small text-muted">
+                    Chọn các dịch vụ muốn gán vào danh mục này. 
+                    <br/><i class="bi bi-info-circle me-1"></i>Dịch vụ đang ở danh mục khác sẽ được chuyển qua danh mục này.
+                </div>
+                <button type="submit" class="btn btn-gold px-4">
+                    <i class="bi bi-check-circle me-1"></i> Lưu thay đổi
+                </button>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-custom mb-0">
+                    <thead>
+                        <tr>
+                            <th style="width: 50px;" class="text-center">Chọn</th>
+                            <th>Tên dịch vụ</th>
+                            <th>Mã</th>
+                            <th>Giá</th>
+                            <th>Danh mục hiện tại</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var s in Model)
+                        {
+                            var isInCategory = s.CategoryId == category.CategoryId;
+                            <tr class="@(isInCategory ? "table-active" : "")">
+                                <td class="text-center">
+                                    <div class="form-check d-flex justify-content-center">
+                                        <input class="form-check-input" type="checkbox" name="selectedServiceIds" value="@s.ServiceId" @(isInCategory ? "checked" : "") id="svc-@s.ServiceId">
+                                    </div>
+                                </td>
+                                <td>
+                                    <label class="fw-semibold d-block" for="svc-@s.ServiceId" style="cursor:pointer;">@s.ServiceName</label>
+                                </td>
+                                <td><small class="text-muted">@s.ServiceCode</small></td>
+                                <td class="fw-bold" style="color:var(--gold);">@String.Format("{0:N0}đ", s.Price)</td>
+                                <td>
+                                    @if (s.CategoryId == category.CategoryId)
+                                    {
+                                        <span class="badge badge-gold">Đang chọn</span>
+                                    }
+                                    else if (s.CategoryId != null)
+                                    {
+                                        <span class="badge bg-secondary">@s.Category.CategoryName</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted small">Chưa gán</span>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="p-3 bg-light text-end">
+                <button type="submit" class="btn btn-gold px-4">
+                    <i class="bi bi-check-circle me-1"></i> Lưu thay đổi
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+    .table-active {
+        background-color: rgba(212, 175, 55, 0.05) !important;
+    }
+    .form-check-input:checked {
+        background-color: var(--gold);
+        border-color: var(--gold);
+    }
+</style>

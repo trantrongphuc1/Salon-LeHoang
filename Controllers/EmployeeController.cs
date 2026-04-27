@@ -19,6 +19,8 @@ namespace Salon_LeHoang.Controllers
         public async Task<IActionResult> Index()
         {
             var employees = await _context.Employees
+                .Include(e => e.CategoryCommissions)
+                .ThenInclude(c => c.Category)
                 .OrderByDescending(e => e.CreatedAt)
                 .ToListAsync();
             return View(employees);
@@ -27,6 +29,7 @@ namespace Salon_LeHoang.Controllers
         public async Task<IActionResult> Details(int id)
         {
             var employee = await _context.Employees
+                .Include(e => e.CategoryCommissions).ThenInclude(c => c.Category)
                 .Include(e => e.InvoiceDetails).ThenInclude(d => d.Service)
                 .Include(e => e.InvoiceDetails).ThenInclude(d => d.Invoice).ThenInclude(i => i.Customer)
                 .FirstOrDefaultAsync(e => e.EmployeeId == id);
@@ -35,24 +38,20 @@ namespace Salon_LeHoang.Controllers
             return View(employee);
         }
 
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
+            ViewBag.Categories = await _context.ServiceCategories.ToListAsync();
             return View();
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(Employee employee)
+        public async Task<IActionResult> Create(Employee employee, Dictionary<int, decimal> commissions)
         {
             if (string.IsNullOrWhiteSpace(employee.FullName))
             {
                 ViewBag.Error = "Vui lòng nhập tên nhân viên.";
-                return View(employee);
-            }
-
-            if (employee.CommissionRate < 0 || employee.CommissionRate > 100)
-            {
-                ViewBag.Error = "Tỷ lệ hoa hồng phải từ 0 đến 100%.";
+                ViewBag.Categories = await _context.ServiceCategories.ToListAsync();
                 return View(employee);
             }
 
@@ -60,27 +59,50 @@ namespace Salon_LeHoang.Controllers
             employee.CreatedAt = DateTime.Now;
             _context.Employees.Add(employee);
             await _context.SaveChangesAsync();
+
+            if (commissions != null)
+            {
+                foreach (var kvp in commissions)
+                {
+                    _context.EmployeeCommissions.Add(new EmployeeCommission
+                    {
+                        EmployeeId = employee.EmployeeId,
+                        CategoryId = kvp.Key,
+                        CommissionRate = kvp.Value
+                    });
+                }
+                await _context.SaveChangesAsync();
+            }
+
             TempData["Success"] = "Thêm nhân viên thành công!";
             return RedirectToAction(nameof(Index));
         }
 
         public async Task<IActionResult> Edit(int id)
         {
-            var employee = await _context.Employees.FindAsync(id);
+            var employee = await _context.Employees
+                .Include(e => e.CategoryCommissions)
+                .FirstOrDefaultAsync(e => e.EmployeeId == id);
+            
             if (employee == null) return NotFound();
+            ViewBag.Categories = await _context.ServiceCategories.ToListAsync();
             return View(employee);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(Employee employee)
+        public async Task<IActionResult> Edit(Employee employee, Dictionary<int, decimal> commissions)
         {
-            var existing = await _context.Employees.FindAsync(employee.EmployeeId);
+            var existing = await _context.Employees
+                .Include(e => e.CategoryCommissions)
+                .FirstOrDefaultAsync(e => e.EmployeeId == employee.EmployeeId);
+            
             if (existing == null) return NotFound();
 
             if (string.IsNullOrWhiteSpace(employee.FullName))
             {
                 ViewBag.Error = "Vui lòng nhập tên nhân viên.";
+                ViewBag.Categories = await _context.ServiceCategories.ToListAsync();
                 return View(employee);
             }
 
@@ -88,8 +110,22 @@ namespace Salon_LeHoang.Controllers
             existing.PhoneNumber = employee.PhoneNumber;
             existing.Position = employee.Position;
             existing.BaseSalary = employee.BaseSalary;
-            existing.CommissionRate = employee.CommissionRate;
             existing.IsActive = employee.IsActive;
+
+            // Update commissions
+            _context.EmployeeCommissions.RemoveRange(existing.CategoryCommissions);
+            if (commissions != null)
+            {
+                foreach (var kvp in commissions)
+                {
+                    _context.EmployeeCommissions.Add(new EmployeeCommission
+                    {
+                        EmployeeId = existing.EmployeeId,
+                        CategoryId = kvp.Key,
+                        CommissionRate = kvp.Value
+                    });
+                }
+            }
 
             await _context.SaveChangesAsync();
             TempData["Success"] = "Cập nhật nhân viên thành công!";
@@ -171,21 +207,27 @@ namespace Salon_LeHoang.Controllers
             var m = month ?? DateTime.Now.Month;
             var y = year ?? DateTime.Now.Year;
 
-            var employees = await _context.Employees.Where(e => e.IsActive).OrderBy(e => e.FullName).ToListAsync();
+            var employees = await _context.Employees
+                .Include(e => e.CategoryCommissions)
+                .Where(e => e.IsActive)
+                .OrderBy(e => e.FullName)
+                .ToListAsync();
+
             var attendances = await _context.Attendances
                 .Where(a => a.AttendanceMonth == m && a.AttendanceYear == y)
                 .ToListAsync();
 
-            // Tính tổng hóa đơn theo nhân viên trong tháng
             var startDate = new DateTime(y, m, 1);
             var endDate = startDate.AddMonths(1);
 
-            var invoiceAmounts = await _context.InvoiceDetails
+            var invoiceDetails = await _context.InvoiceDetails
                 .Include(d => d.Invoice)
+                .Include(d => d.Service)
                 .Where(d => d.Invoice.PaymentDate >= startDate && d.Invoice.PaymentDate < endDate)
-                .GroupBy(d => d.EmployeeId)
-                .Select(g => new { EmployeeId = g.Key, Total = g.Sum(d => d.Price * d.Quantity) })
                 .ToListAsync();
+
+            var categories = await _context.ServiceCategories.OrderBy(c => c.CategoryName).ToListAsync();
+            ViewBag.Categories = categories;
 
             var vm = new PayrollViewModel
             {
@@ -194,14 +236,31 @@ namespace Salon_LeHoang.Controllers
                 Items = employees.Select(emp =>
                 {
                     var att = attendances.FirstOrDefault(a => a.EmployeeId == emp.EmployeeId);
-                    var invoiceTotal = invoiceAmounts.FirstOrDefault(x => x.EmployeeId == emp.EmployeeId)?.Total ?? 0;
+                    var empDetails = invoiceDetails.Where(x => x.EmployeeId == emp.EmployeeId);
+
+                    var catTotals = new Dictionary<int, decimal>();
+                    var catComms = new Dictionary<int, decimal>();
+
+                    foreach (var cat in categories)
+                    {
+                        var totalForCat = empDetails
+                            .Where(d => d.Service.CategoryId == cat.CategoryId)
+                            .Sum(d => d.Price * d.Quantity);
+                        
+                        var rate = emp.CategoryCommissions
+                            .FirstOrDefault(c => c.CategoryId == cat.CategoryId)?.CommissionRate ?? 0;
+
+                        catTotals[cat.CategoryId] = totalForCat;
+                        catComms[cat.CategoryId] = totalForCat * rate / 100;
+                    }
 
                     return new EmployeePayrollItem
                     {
                         Employee = emp,
                         DaysOff = att?.DaysOff ?? 0,
                         LateDays = att?.LateDays ?? 0,
-                        TotalInvoiceAmount = invoiceTotal,
+                        CategoryTotals = catTotals,
+                        CategoryCommissions = catComms,
                         AttendanceNotes = att?.Notes,
                         LateNotes = att?.LateNotes
                     };
@@ -217,7 +276,10 @@ namespace Salon_LeHoang.Controllers
             var m = month ?? DateTime.Now.Month;
             var y = year ?? DateTime.Now.Year;
 
-            var employee = await _context.Employees.FindAsync(employeeId);
+            var employee = await _context.Employees
+                .Include(e => e.CategoryCommissions)
+                .FirstOrDefaultAsync(e => e.EmployeeId == employeeId);
+
             if (employee == null) return NotFound();
 
             var att = await _context.Attendances
@@ -228,19 +290,37 @@ namespace Salon_LeHoang.Controllers
 
             var invoiceDetails = await _context.InvoiceDetails
                 .Include(d => d.Invoice).ThenInclude(i => i.Customer)
-                .Include(d => d.Service)
+                .Include(d => d.Service).ThenInclude(s => s.Category)
                 .Where(d => d.EmployeeId == employeeId && d.Invoice.PaymentDate >= startDate && d.Invoice.PaymentDate < endDate)
                 .OrderBy(d => d.Invoice.PaymentDate)
                 .ToListAsync();
 
-            var totalInvoiceAmount = invoiceDetails.Sum(d => d.Price * d.Quantity);
+            var categories = await _context.ServiceCategories.OrderBy(c => c.CategoryName).ToListAsync();
+            ViewBag.Categories = categories;
+
+            var catTotals = new Dictionary<int, decimal>();
+            var catComms = new Dictionary<int, decimal>();
+
+            foreach (var cat in categories)
+            {
+                var totalForCat = invoiceDetails
+                    .Where(d => d.Service.CategoryId == cat.CategoryId)
+                    .Sum(d => d.Price * d.Quantity);
+
+                var rate = employee.CategoryCommissions
+                    .FirstOrDefault(c => c.CategoryId == cat.CategoryId)?.CommissionRate ?? 0;
+
+                catTotals[cat.CategoryId] = totalForCat;
+                catComms[cat.CategoryId] = totalForCat * rate / 100;
+            }
 
             var payrollItem = new EmployeePayrollItem
             {
                 Employee = employee,
                 DaysOff = att?.DaysOff ?? 0,
                 LateDays = att?.LateDays ?? 0,
-                TotalInvoiceAmount = totalInvoiceAmount,
+                CategoryTotals = catTotals,
+                CategoryCommissions = catComms,
                 AttendanceNotes = att?.Notes,
                 LateNotes = att?.LateNotes
             };

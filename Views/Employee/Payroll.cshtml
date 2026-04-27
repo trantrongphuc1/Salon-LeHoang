@@ -42,13 +42,15 @@
                 <thead>
                     <tr>
                         <th>Nhân viên</th>
-                        <th>Lương CB</th>
-                        <th>Ngày nghỉ</th>
-                        <th>Ngày trễ</th>
-                        <th>Lương theo công</th>
-                        <th>Doanh thu HĐ</th>
-                        <th>Hoa hồng (%)</th>
-                        <th>Tiền hoa hồng</th>
+                        <th>Lương công</th>
+                        @{
+                            var cats = ViewBag.Categories as List<Salon_LeHoang.Models.ServiceCategory> ?? new List<Salon_LeHoang.Models.ServiceCategory>();
+                        }
+                        @foreach (var cat in cats)
+                        {
+                            <th>@cat.CategoryName</th>
+                        }
+                        <th>Tổng H.Hồng</th>
                         <th class="fw-bold" style="color:var(--gold);">TỔNG LƯƠNG</th>
                         <th class="text-end no-print">Chi tiết</th>
                     </tr>
@@ -62,17 +64,19 @@
                         grandTotal += item.TotalSalary;
                         <tr>
                             <td class="fw-semibold">@item.Employee.FullName</td>
-                            <td>@String.Format("{0:N0}đ", item.Employee.BaseSalary)</td>
-                            <td class="@(item.ExcessDaysOff > 0 ? "text-danger fw-bold" : "")">
-                                @item.DaysOff ngày
-                            </td>
-                            <td class="@(item.LateDays > 5 ? "text-danger fw-bold" : "")">
-                                @item.LateDays ngày
-                            </td>
                             <td class="fw-semibold">@String.Format("{0:N0}đ", item.BaseSalaryEarned)</td>
-                            <td>@String.Format("{0:N0}đ", item.TotalInvoiceAmount)</td>
-                            <td><span class="badge badge-gold">@item.Employee.CommissionRate%</span></td>
-                            <td class="text-info">@String.Format("{0:N0}đ", item.CommissionEarned)</td>
+                            @foreach (var cat in cats)
+                            {
+                                var total = item.CategoryTotals.ContainsKey(cat.CategoryId) ? item.CategoryTotals[cat.CategoryId] : 0;
+                                var comm = item.CategoryCommissions.ContainsKey(cat.CategoryId) ? item.CategoryCommissions[cat.CategoryId] : 0;
+                                var rate = item.Employee.CategoryCommissions.FirstOrDefault(c => c.CategoryId == cat.CategoryId)?.CommissionRate ?? 0;
+                                <td>
+                                    <div class="small text-muted">@String.Format("{0:N0}", total)</div>
+                                    <div class="text-info fw-bold">@String.Format("{0:N0}đ", comm)</div>
+                                    <div class="badge badge-gold" style="font-size: 0.7rem;">@rate%</div>
+                                </td>
+                            }
+                            <td class="fw-bold text-info">@String.Format("{0:N0}đ", item.TotalCommission)</td>
                             <td class="fw-bold fs-6" style="color:var(--gold);">@String.Format("{0:N0}đ", item.TotalSalary)</td>
                             <td class="text-end no-print">
                                 <a asp-action="PayrollDetail" asp-route-employeeId="@item.Employee.EmployeeId" asp-route-month="@Model.Month" asp-route-year="@Model.Year"
@@ -83,7 +87,7 @@
                 </tbody>
                 <tfoot>
                     <tr style="border-top:2px solid var(--gold);">
-                        <td colspan="8" class="fw-bold text-end">TỔNG CHI LƯƠNG:</td>
+                        <td colspan="@(3 + cats.Count)" class="fw-bold text-end">TỔNG CHI LƯƠNG:</td>
                         <td class="fw-bold fs-5" style="color:var(--gold);">@String.Format("{0:N0}đ", grandTotal)</td>
                         <td class="no-print"></td>
                     </tr>

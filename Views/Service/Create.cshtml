@@ -34,6 +34,12 @@
                         <label class="form-label">Thời gian (phút)</label>
                         <input asp-for="DurationMinutes" type="number" class="form-control" value="30" min="1" />
                     </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Danh mục dịch vụ</label>
+                        <select asp-for="CategoryId" class="form-select" asp-items="@(new SelectList(ViewBag.Categories, "CategoryId", "CategoryName"))">
+                            <option value="">-- Chọn danh mục --</option>
+                        </select>
+                    </div>
                     <div class="col-12">
                         <label class="form-label">Mô tả</label>
                         <textarea asp-for="Description" class="form-control" rows="3" placeholder="Mô tả chi tiết dịch vụ..."></textarea>

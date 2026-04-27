@@ -36,7 +36,7 @@
                             <div class="fs-5 fw-bold" style="color:var(--gold);"><i class="bi bi-star-fill me-1"></i><span id="customerPoints">0</span> điểm</div>
                         </div>
                         <div class="mb-3">
-                            <label class="form-label">Dùng điểm (1 điểm = 1,000đ)</label>
+                            <label class="form-label">Dùng điểm (1 điểm = 1đ)</label>
                             <input type="number" name="pointsToUse" id="pointsToUse" class="form-control" value="0" min="0" onchange="calcTotal()" />
                         </div>
                     </div>
@@ -162,7 +162,7 @@
             var opt = sel.options[sel.selectedIndex];
             if (sel.value) {
                 document.getElementById('customerInfo').style.display = 'block';
-                document.getElementById('customerPoints').textContent = opt.getAttribute('data-points');
+                document.getElementById('customerPoints').textContent = Math.round(parseFloat(opt.getAttribute('data-points'))).toLocaleString('vi-VN');
                 document.getElementById('pointsToUse').max = opt.getAttribute('data-points');
             } else {
                 document.getElementById('customerInfo').style.display = 'none';
@@ -184,8 +184,8 @@
                 row.querySelector('.line-total').textContent = Number(lineTotal).toLocaleString('vi-VN') + 'đ';
             });
 
-            var pointsToUse = parseInt(document.getElementById('pointsToUse').value) || 0;
-            var discount = pointsToUse * 1000;
+            var pointsToUse = Math.round(parseFloat(document.getElementById('pointsToUse').value)) || 0;
+            var discount = pointsToUse;
             if (discount > total) discount = total;
             var final_ = total - discount;
 

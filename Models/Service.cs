@@ -19,9 +19,13 @@ public partial class Service
 
     public string? ImageUrl { get; set; }
 
+    public int? CategoryId { get; set; }
+
     public bool IsActive { get; set; }
 
     public DateTime CreatedAt { get; set; }
+
+    public virtual ServiceCategory? Category { get; set; }
 
     public virtual ICollection<AppointmentDetail> AppointmentDetails { get; set; } = new List<AppointmentDetail>();
 

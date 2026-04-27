@@ -1,0 +1,46 @@
+@model IEnumerable<Salon_LeHoang.Models.ServiceCategory>
+@{
+    ViewData["Title"] = "Quản lý Danh mục Dịch vụ";
+}
+
+<div class="animate-in">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h4 class="fw-bold mb-0"><i class="bi bi-folder2-open me-2" style="color:var(--gold);"></i>Danh mục dịch vụ</h4>
+        <a asp-action="Create" class="btn btn-gold"><i class="bi bi-plus-circle me-1"></i> Thêm danh mục</a>
+    </div>
+
+    <div class="card-custom">
+        <div class="table-responsive">
+            <table class="table table-custom">
+                <thead>
+                    <tr>
+                        <th style="width:10%;">ID</th>
+                        <th>Tên danh mục</th>
+                        <th class="text-end">Hành động</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var c in Model)
+                    {
+                        <tr>
+                            <td>#@c.CategoryId</td>
+                            <td class="fw-semibold">@c.CategoryName</td>
+                             <td class="text-end text-nowrap">
+                                <a asp-action="ManageServices" asp-route-id="@c.CategoryId" class="btn btn-sm btn-gold"><i class="bi bi-plus-lg me-1"></i> Thêm dịch vụ</a>
+                                <a asp-action="Edit" asp-route-id="@c.CategoryId" class="btn btn-sm btn-outline-gold"><i class="bi bi-pencil"></i></a>
+                                <form asp-action="Delete" method="post" class="d-inline" onsubmit="return confirm('Bạn có chắc muốn xóa danh mục này?')">
+                                    <input type="hidden" name="id" value="@c.CategoryId" />
+                                    <button type="submit" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                    @if (!Model.Any())
+                    {
+                        <tr><td colspan="3" class="text-center py-4 text-muted">Chưa có danh mục nào.</td></tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

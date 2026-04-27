@@ -15,7 +15,7 @@ public partial class User
 
     public string Role { get; set; } = null!;
 
-    public int Points { get; set; }
+    public decimal Points { get; set; }
 
     public bool IsActive { get; set; }
 

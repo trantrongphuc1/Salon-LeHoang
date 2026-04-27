@@ -30,11 +30,22 @@ namespace Salon_LeHoang.Models
             if (!context.Employees.Any())
             {
                 context.Employees.AddRange(
-                    new Employee { FullName = "Nguyễn Văn Thợ", PhoneNumber = "0988111222", Position = "Thợ chính", BaseSalary = 6000000, CommissionRate = 5, IsActive = true, CreatedAt = DateTime.Now },
-                    new Employee { FullName = "Trần Thị Cắt", PhoneNumber = "0988111223", Position = "Thợ cắt", BaseSalary = 5000000, CommissionRate = 4, IsActive = true, CreatedAt = DateTime.Now },
-                    new Employee { FullName = "Lê Văn Gội", PhoneNumber = "0988111224", Position = "Thợ gội/massage", BaseSalary = 4000000, CommissionRate = 3, IsActive = true, CreatedAt = DateTime.Now },
-                    new Employee { FullName = "Phạm Uyển Nhuộm", PhoneNumber = "0988111225", Position = "Thợ hóa chất", BaseSalary = 7000000, CommissionRate = 5, IsActive = true, CreatedAt = DateTime.Now },
-                    new Employee { FullName = "Hoàng Tạo Kiểu", PhoneNumber = "0988111226", Position = "Stylist", BaseSalary = 8000000, CommissionRate = 5, IsActive = true, CreatedAt = DateTime.Now }
+                    new Employee { FullName = "Nguyễn Văn Thợ", PhoneNumber = "0988111222", Position = "Thợ chính", BaseSalary = 6000000, IsActive = true, CreatedAt = DateTime.Now },
+                    new Employee { FullName = "Trần Thị Cắt", PhoneNumber = "0988111223", Position = "Thợ cắt", BaseSalary = 5000000, IsActive = true, CreatedAt = DateTime.Now },
+                    new Employee { FullName = "Lê Văn Gội", PhoneNumber = "0988111224", Position = "Thợ gội/massage", BaseSalary = 4000000, IsActive = true, CreatedAt = DateTime.Now },
+                    new Employee { FullName = "Phạm Uyển Nhuộm", PhoneNumber = "0988111225", Position = "Thợ hóa chất", BaseSalary = 7000000, IsActive = true, CreatedAt = DateTime.Now },
+                    new Employee { FullName = "Hoàng Tạo Kiểu", PhoneNumber = "0988111226", Position = "Stylist", BaseSalary = 8000000, IsActive = true, CreatedAt = DateTime.Now }
+                );
+                context.SaveChanges();
+            }
+
+            // Seed Categories
+            if (!context.ServiceCategories.Any())
+            {
+                context.ServiceCategories.AddRange(
+                    new ServiceCategory { CategoryName = "Cắt tóc" },
+                    new ServiceCategory { CategoryName = "Gội & Massage" },
+                    new ServiceCategory { CategoryName = "Hóa chất (Uốn/Nhuộm)" }
                 );
                 context.SaveChanges();
             }

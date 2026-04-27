@@ -15,7 +15,7 @@ public partial class Employee
 
     public decimal BaseSalary { get; set; }
 
-    public decimal CommissionRate { get; set; }
+    public virtual ICollection<EmployeeCommission> CategoryCommissions { get; set; } = new List<EmployeeCommission>();
 
     public bool IsActive { get; set; }
 

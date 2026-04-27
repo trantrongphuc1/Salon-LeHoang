@@ -34,11 +34,22 @@
                         <label class="form-label">Lương cơ bản (VNĐ/tháng) <span class="text-danger">*</span></label>
                         <input asp-for="BaseSalary" type="number" class="form-control" placeholder="6000000" min="0" />
                     </div>
-                    <div class="col-md-3">
-                        <label class="form-label">Hoa hồng (%) <span class="text-danger">*</span></label>
-                        <input asp-for="CommissionRate" type="number" step="0.5" class="form-control" placeholder="5" min="0" max="100" value="3" />
-                        <div class="form-text text-muted">Thường 3-5% trên hóa đơn</div>
+                    <div class="col-12 mt-3">
+                        <h6 class="fw-bold" style="color:var(--gold);"><i class="bi bi-percent me-2"></i>Cài đặt hoa hồng theo danh mục</h6>
+                        <hr style="border-color:var(--border-color); opacity: 0.1;" />
                     </div>
+                    
+                    @{
+                        var cats = ViewBag.Categories as List<Salon_LeHoang.Models.ServiceCategory> ?? new List<Salon_LeHoang.Models.ServiceCategory>();
+                    }
+
+                    @foreach (var cat in cats)
+                    {
+                        <div class="col-md-4">
+                            <label class="form-label">Hoa hồng: @cat.CategoryName (%)</label>
+                            <input type="number" name="commissions[@cat.CategoryId]" step="0.5" class="form-control" placeholder="0" min="0" max="100" value="0" />
+                        </div>
+                    }
 
                     <div class="col-12">
                         <div class="alert" style="background:rgba(59,130,246,0.1);border:1px solid rgba(59,130,246,0.2);color:#60a5fa;border-radius:10px;">

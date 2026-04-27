@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Salon_LeHoang.Models;
 
@@ -11,9 +12,11 @@ using Salon_LeHoang.Models;
 namespace Salon_LeHoang.Migrations
 {
     [DbContext(typeof(SalonLeHoangContext))]
-    partial class SalonLeHoangContextModelSnapshot : ModelSnapshot
+    [Migration("20260427063516_UpdatePointsToDecimal")]
+    partial class UpdatePointsToDecimal
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -145,6 +148,11 @@ namespace Salon_LeHoang.Migrations
                         .HasColumnType("decimal(18, 2)")
                         .HasDefaultValue(0m);
 
+                    b.Property<decimal>("CommissionRate")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("decimal(5, 2)")
+                        .HasDefaultValue(3m);
+
                     b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime")
@@ -172,26 +180,6 @@ namespace Salon_LeHoang.Migrations
                     b.HasKey("EmployeeId");
 
                     b.ToTable("Employees");
-                });
-
-            modelBuilder.Entity("Salon_LeHoang.Models.EmployeeCommission", b =>
-                {
-                    b.Property<int>("EmployeeId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("CategoryId")
-                        .HasColumnType("int");
-
-                    b.Property<decimal>("CommissionRate")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("decimal(5, 2)")
-                        .HasDefaultValue(0m);
-
-                    b.HasKey("EmployeeId", "CategoryId");
-
-                    b.HasIndex("CategoryId");
-
-                    b.ToTable("EmployeeCommissions");
                 });
 
             modelBuilder.Entity("Salon_LeHoang.Models.Expense", b =>
@@ -363,9 +351,6 @@ namespace Salon_LeHoang.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ServiceId"));
 
-                    b.Property<int?>("CategoryId")
-                        .HasColumnType("int");
-
                     b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime")
@@ -402,27 +387,7 @@ namespace Salon_LeHoang.Migrations
 
                     b.HasKey("ServiceId");
 
-                    b.HasIndex("CategoryId");
-
                     b.ToTable("Services");
-                });
-
-            modelBuilder.Entity("Salon_LeHoang.Models.ServiceCategory", b =>
-                {
-                    b.Property<int>("CategoryId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("CategoryId"));
-
-                    b.Property<string>("CategoryName")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.HasKey("CategoryId");
-
-                    b.ToTable("ServiceCategories");
                 });
 
             modelBuilder.Entity("Salon_LeHoang.Models.User", b =>
@@ -517,25 +482,6 @@ namespace Salon_LeHoang.Migrations
                     b.Navigation("Employee");
                 });
 
-            modelBuilder.Entity("Salon_LeHoang.Models.EmployeeCommission", b =>
-                {
-                    b.HasOne("Salon_LeHoang.Models.ServiceCategory", "Category")
-                        .WithMany()
-                        .HasForeignKey("CategoryId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Salon_LeHoang.Models.Employee", "Employee")
-                        .WithMany("CategoryCommissions")
-                        .HasForeignKey("EmployeeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Category");
-
-                    b.Navigation("Employee");
-                });
-
             modelBuilder.Entity("Salon_LeHoang.Models.Invoice", b =>
                 {
                     b.HasOne("Salon_LeHoang.Models.Appointment", null)
@@ -591,16 +537,6 @@ namespace Salon_LeHoang.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("Salon_LeHoang.Models.Service", b =>
-                {
-                    b.HasOne("Salon_LeHoang.Models.ServiceCategory", "Category")
-                        .WithMany("Services")
-                        .HasForeignKey("CategoryId")
-                        .OnDelete(DeleteBehavior.SetNull);
-
-                    b.Navigation("Category");
-                });
-
             modelBuilder.Entity("Salon_LeHoang.Models.Appointment", b =>
                 {
                     b.Navigation("AppointmentDetails");
@@ -611,8 +547,6 @@ namespace Salon_LeHoang.Migrations
             modelBuilder.Entity("Salon_LeHoang.Models.Employee", b =>
                 {
                     b.Navigation("Attendances");
-
-                    b.Navigation("CategoryCommissions");
 
                     b.Navigation("InvoiceDetails");
                 });
@@ -629,11 +563,6 @@ namespace Salon_LeHoang.Migrations
                     b.Navigation("AppointmentDetails");
 
                     b.Navigation("InvoiceDetails");
-                });
-
-            modelBuilder.Entity("Salon_LeHoang.Models.ServiceCategory", b =>
-                {
-                    b.Navigation("Services");
                 });
 
             modelBuilder.Entity("Salon_LeHoang.Models.User", b =>

@@ -15,9 +15,9 @@ public partial class Invoice
 
     public decimal FinalAmount { get; set; }
 
-    public int EarnedPoints { get; set; }
+    public decimal EarnedPoints { get; set; }
 
-    public int PointsUsed { get; set; }
+    public decimal PointsUsed { get; set; }
 
     public string? PaymentMethod { get; set; }
 

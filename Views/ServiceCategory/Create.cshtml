@@ -1,0 +1,29 @@
+@model Salon_LeHoang.Models.ServiceCategory
+@{
+    ViewData["Title"] = "Thêm danh mục";
+}
+
+<div class="animate-in">
+    <div class="d-flex align-items-center gap-2 mb-4">
+        <a asp-action="Index" class="btn btn-sm btn-outline-secondary"><i class="bi bi-arrow-left"></i></a>
+        <h4 class="fw-bold mb-0">Thêm danh mục dịch vụ</h4>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card-custom p-4">
+                <form asp-action="Create" method="post">
+                    @if (ViewBag.Error != null)
+                    {
+                        <div class="alert alert-danger">@ViewBag.Error</div>
+                    }
+                    <div class="mb-3">
+                        <label class="form-label">Tên danh mục <span class="text-danger">*</span></label>
+                        <input asp-for="CategoryName" class="form-control" placeholder="VD: Cắt tóc, Uốn nhuộm..." required />
+                    </div>
+                    <button type="submit" class="btn btn-gold w-100 py-2 mt-3">Thêm danh mục</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

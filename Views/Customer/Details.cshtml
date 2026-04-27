@@ -21,7 +21,7 @@
                 <h5 class="text-center fw-bold">@Model.FullName</h5>
                 <p class="text-center text-muted mb-3">@Model.PhoneNumber</p>
                 <div class="text-center mb-3">
-                    <span class="badge badge-gold fs-5 px-3 py-2"><i class="bi bi-star-fill me-1"></i>@Model.Points điểm</span>
+                    <span class="badge badge-gold fs-5 px-3 py-2"><i class="bi bi-star-fill me-1"></i>@Model.Points.ToString("N0") điểm</span>
                 </div>
                 <hr style="border-color:var(--border-color);" />
                 <div class="small text-muted">
@@ -83,7 +83,7 @@
                                         }
                                     </td>
                                     <td class="fw-bold" style="color:var(--gold);">@String.Format("{0:N0}đ", inv.FinalAmount)</td>
-                                    <td class="text-success">+@inv.EarnedPoints</td>
+                                    <td class="text-success">+@inv.EarnedPoints.ToString("N0")</td>
                                     <td class="text-muted">@inv.PaymentDate.ToString("dd/MM/yyyy HH:mm")</td>
                                 </tr>
                             }
@@ -115,7 +115,7 @@
                             {
                                 <tr>
                                     <td class="@(ph.PointsChanged > 0 ? "text-success fw-bold" : "text-danger fw-bold")">
-                                        @(ph.PointsChanged > 0 ? "+" : "")@ph.PointsChanged
+                                        @(ph.PointsChanged > 0 ? "+" : "")@ph.PointsChanged.ToString("N0")
                                     </td>
                                     <td>@ph.Description</td>
                                     <td class="text-muted">@ph.CreatedAt.ToString("dd/MM/yyyy HH:mm")</td>

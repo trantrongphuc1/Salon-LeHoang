@@ -407,6 +407,10 @@
                        asp-controller="Service" asp-action="Index">
                         <i class="bi bi-stars"></i> Dịch vụ
                     </a>
+                    <a class="sidebar-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "ServiceCategory" ? "active" : "")"
+                       asp-controller="ServiceCategory" asp-action="Index">
+                        <i class="bi bi-folder2-open"></i> Danh mục dịch vụ
+                    </a>
                     <a class="sidebar-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Customer" ? "active" : "")"
                        asp-controller="Customer" asp-action="Index">
                         <i class="bi bi-people-fill"></i> Khách hàng
@@ -439,6 +443,10 @@
                     <a class="sidebar-link @(ViewContext.RouteData.Values["action"]?.ToString() == "Payroll" ? "active" : "")"
                        asp-controller="Employee" asp-action="Payroll">
                         <i class="bi bi-cash-stack"></i> Bảng lương
+                    </a>
+                    <a class="sidebar-link @(ViewContext.RouteData.Values["action"]?.ToString() == "ProfitReport" ? "active" : "")"
+                       asp-controller="Admin" asp-action="ProfitReport">
+                        <i class="bi bi-graph-up-arrow"></i> Lợi nhuận
                     </a>
                 </div>
             </div>

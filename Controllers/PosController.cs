@@ -82,7 +82,7 @@ namespace Salon_LeHoang.Controllers
         // API: Process payment
         [HttpPost]
         public async Task<IActionResult> Checkout(int customerId, string paymentMethod,
-            int pointsToUse, string? notes, int[] serviceIds, int[] employeeIds, int[] quantities)
+            decimal pointsToUse, string? notes, int[] serviceIds, int[] employeeIds, int[] quantities)
         {
             var customer = await _context.Users.FindAsync(customerId);
             if (customer == null || customer.Role != "Customer")
@@ -118,20 +118,20 @@ namespace Salon_LeHoang.Controllers
 
             // Points discount
             decimal discountAmount = 0;
-            int actualPointsUsed = 0;
+            decimal actualPointsUsed = 0;
             if (pointsToUse > 0 && customer.Points > 0)
             {
                 actualPointsUsed = Math.Min(pointsToUse, customer.Points);
-                discountAmount = actualPointsUsed * 1000;
+                discountAmount = actualPointsUsed; // 1 điểm = 1đ
                 if (discountAmount > totalAmount)
                 {
                     discountAmount = totalAmount;
-                    actualPointsUsed = (int)(totalAmount / 1000);
+                    actualPointsUsed = totalAmount;
                 }
             }
 
             var finalAmount = totalAmount - discountAmount;
-            var earnedPoints = (int)(finalAmount / 10000);
+            var earnedPoints = Math.Round(finalAmount * 0.03m, 0);
 
             var invoice = new Invoice
             {

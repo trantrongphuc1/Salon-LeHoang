@@ -4,13 +4,36 @@
 }
 
 <div class="animate-in">
+    <!-- Date Selector -->
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+        <h4 class="mb-0 fw-bold">@(ViewBag.IsDailyView ? $"Thống kê ngày {((DateTime)ViewBag.DisplayDate).ToString("dd/MM/yyyy")}" : "Tổng quan hệ thống")</h4>
+        <form asp-action="Index" method="get" class="d-flex align-items-center gap-2">
+            @if (ViewBag.IsDailyView)
+            {
+                <a asp-action="Index" class="btn btn-sm btn-outline-danger me-2">
+                    <i class="bi bi-x-circle me-1"></i> Xóa filter
+                </a>
+            }
+            <label class="text-muted small fw-medium">Xem theo ngày:</label>
+            <input type="date" name="date" class="form-control form-control-sm" 
+                   value="@(((DateTime)ViewBag.DisplayDate).ToString("yyyy-MM-dd"))" 
+                   onchange="this.form.submit()" />
+            @if (!ViewBag.IsDailyView)
+            {
+                <a asp-action="Index" asp-route-date="@DateTime.Today.ToString("yyyy-MM-dd")" class="btn btn-sm btn-outline-secondary">Hôm nay</a>
+            }
+        </form>
+    </div>
+
     <!-- Stats Cards -->
     <div class="row g-3 mb-4">
         <div class="col-md-3 col-sm-6">
             <div class="stat-card">
                 <div class="d-flex justify-content-between align-items-start">
                     <div>
-                        <div class="text-muted small mb-1">Hôm nay</div>
+                        <div class="text-muted small mb-1">
+                            @(ViewBag.IsDailyView ? "Doanh thu ngày" : "Doanh thu hôm nay")
+                        </div>
                         <div class="fs-5 fw-bold" style="color: var(--gold);">@String.Format("{0:N0}đ", Model.TodayRevenue)</div>
                         <div class="text-muted small mt-1">@Model.TodayInvoiceCount hóa đơn</div>
                     </div>
@@ -68,7 +91,7 @@
         <!-- Top Services -->
         <div class="col-md-6">
             <div class="card-custom h-100">
-                <div class="card-header"><h6 class="mb-0 fw-semibold"><i class="bi bi-stars me-2" style="color:var(--gold);"></i>Top dịch vụ (Sử dụng nhiều)</h6></div>
+                <div class="card-header"><h6 class="mb-0 fw-semibold"><i class="bi bi-stars me-2" style="color:var(--gold);"></i>Top dịch vụ (@(ViewBag.IsDailyView ? "trong ngày" : "trong tháng"))</h6></div>
                 <div class="p-0">
                     <table class="table table-custom mb-0">
                         <thead><tr><th>Dịch vụ</th><th class="text-center">Số lần</th><th class="text-end">Doanh thu</th></tr></thead>
@@ -88,7 +111,7 @@
         <!-- Top Customers -->
         <div class="col-md-6">
             <div class="card-custom h-100">
-                <div class="card-header"><h6 class="mb-0 fw-semibold"><i class="bi bi-person-check me-2" style="color:var(--gold);"></i>Top khách hàng (Chi tiêu)</h6></div>
+                <div class="card-header"><h6 class="mb-0 fw-semibold"><i class="bi bi-person-check me-2" style="color:var(--gold);"></i>Top khách hàng (@(ViewBag.IsDailyView ? "trong ngày" : "trong tháng"))</h6></div>
                 <div class="p-0">
                     <table class="table table-custom mb-0">
                         <thead><tr><th>Khách hàng</th><th class="text-center">Số HĐ</th><th class="text-end">Tổng chi</th></tr></thead>
@@ -113,7 +136,7 @@
     <!-- Recent Invoices -->
     <div class="card-custom">
         <div class="card-header d-flex justify-content-between align-items-center">
-            <h6 class="mb-0 fw-semibold"><i class="bi bi-receipt me-2" style="color:var(--gold);"></i>Hóa đơn gần đây</h6>
+            <h6 class="mb-0 fw-semibold"><i class="bi bi-receipt me-2" style="color:var(--gold);"></i>@(ViewBag.IsDailyView ? "Hóa đơn trong ngày" : "Hóa đơn gần đây")</h6>
             <a asp-controller="Invoice" asp-action="Index" class="btn btn-sm btn-outline-gold">Xem tất cả</a>
         </div>
         <div class="table-responsive">

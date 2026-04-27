@@ -29,8 +29,9 @@ namespace Salon_LeHoang.Controllers
             return View(services);
         }
 
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
+            ViewBag.Categories = await _context.ServiceCategories.ToListAsync();
             return View();
         }
 
@@ -41,6 +42,7 @@ namespace Salon_LeHoang.Controllers
             if (string.IsNullOrWhiteSpace(service.ServiceName) || service.Price <= 0)
             {
                 ViewBag.Error = "Vui lòng nhập đầy đủ thông tin.";
+                ViewBag.Categories = await _context.ServiceCategories.ToListAsync();
                 return View(service);
             }
 
@@ -56,6 +58,7 @@ namespace Salon_LeHoang.Controllers
         {
             var service = await _context.Services.FindAsync(id);
             if (service == null) return NotFound();
+            ViewBag.Categories = await _context.ServiceCategories.ToListAsync();
             return View(service);
         }
 
@@ -69,6 +72,7 @@ namespace Salon_LeHoang.Controllers
             if (string.IsNullOrWhiteSpace(service.ServiceName) || service.Price <= 0)
             {
                 ViewBag.Error = "Vui lòng nhập đầy đủ thông tin.";
+                ViewBag.Categories = await _context.ServiceCategories.ToListAsync();
                 return View(service);
             }
 
@@ -77,6 +81,7 @@ namespace Salon_LeHoang.Controllers
             existing.Price = service.Price;
             existing.DurationMinutes = service.DurationMinutes;
             existing.ImageUrl = service.ImageUrl;
+            existing.CategoryId = service.CategoryId;
             existing.IsActive = service.IsActive;
 
             await _context.SaveChangesAsync();

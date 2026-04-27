@@ -35,7 +35,16 @@
                             <td>@(e.PhoneNumber ?? "—")</td>
                             <td>@(e.Position ?? "—")</td>
                             <td class="fw-bold" style="color:var(--gold);">@String.Format("{0:N0}đ", e.BaseSalary)</td>
-                            <td><span class="badge badge-gold">@e.CommissionRate%</span></td>
+                             <td>
+                                <div class="d-flex flex-wrap gap-1" style="max-width: 200px;">
+                                    @foreach (var comm in e.CategoryCommissions.OrderBy(c => c.Category.CategoryName))
+                                    {
+                                        <span class="badge badge-gold" style="font-size:0.7rem;" title="@comm.Category.CategoryName">
+                                            @comm.Category.CategoryName.Substring(0, Math.Min(3, comm.Category.CategoryName.Length)): @comm.CommissionRate%
+                                        </span>
+                                    }
+                                </div>
+                            </td>
                             <td>
                                 @if (e.IsActive) { <span class="badge bg-success">Hoạt động</span> }
                                 else { <span class="badge bg-secondary">Nghỉ</span> }

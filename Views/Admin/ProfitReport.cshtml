@@ -1,0 +1,145 @@
+@model Salon_LeHoang.Models.ViewModels.ProfitReportViewModel
+@{
+    ViewData["Title"] = "Báo cáo lợi nhuận";
+}
+
+<div class="animate-in">
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+        <h4 class="mb-0 fw-bold">Báo cáo lợi nhuận tháng @Model.Month/@Model.Year</h4>
+        <form asp-action="ProfitReport" method="get" class="d-flex align-items-center gap-2">
+            <select name="month" class="form-select form-select-sm" onchange="this.form.submit()">
+                @for (int i = 1; i <= 12; i++)
+                {
+                    <option value="@i" selected="@(i == Model.Month)">Tháng @i</option>
+                }
+            </select>
+            <select name="year" class="form-select form-select-sm" onchange="this.form.submit()">
+                @for (int i = DateTime.Now.Year - 2; i <= DateTime.Now.Year + 1; i++)
+                {
+                    <option value="@i" selected="@(i == Model.Year)">Năm @i</option>
+                }
+            </select>
+        </form>
+    </div>
+
+    <!-- Financial Summary -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-3">
+            <div class="stat-card">
+                <div class="text-muted small mb-1">Tổng doanh thu (1)</div>
+                <div class="fs-5 fw-bold text-info">@String.Format("{0:N0}đ", Model.TotalRevenue)</div>
+                <div class="small text-muted mt-1">Tổng tiền từ hóa đơn</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card border-danger-subtle">
+                <div class="text-muted small mb-1">Tổng lương NV (2)</div>
+                <div class="fs-5 fw-bold text-danger">@String.Format("{0:N0}đ", Model.TotalSalaries)</div>
+                <div class="small text-muted mt-1">Lương cứng + Hoa hồng</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card border-warning-subtle">
+                <div class="text-muted small mb-1">Chi phí khác (3)</div>
+                <div class="fs-5 fw-bold text-warning">@String.Format("{0:N0}đ", Model.TotalOtherExpenses)</div>
+                <div class="small text-muted mt-1">Điện, nước, mặt bằng...</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card" style="background: linear-gradient(135deg, rgba(16,185,129,0.1) 0%, rgba(16,185,129,0.05) 100%); border-color: #10b981;">
+                <div class="text-muted small mb-1">Lợi nhuận ròng (1-2-3)</div>
+                <div class="fs-4 fw-bold text-success">@String.Format("{0:N0}đ", Model.NetProfit)</div>
+                <div class="small text-muted mt-1 fw-medium">Thực nhận sau chi phí</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- Add Expense Form -->
+        <div class="col-md-4">
+            <div class="card-custom">
+                <div class="card-header"><h6 class="mb-0 fw-semibold">Thêm chi phí phát sinh</h6></div>
+                <div class="p-3">
+                    <form asp-action="AddExpense" method="post">
+                        <input type="hidden" name="month" value="@Model.Month" />
+                        <input type="hidden" name="year" value="@Model.Year" />
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Tên khoản chi</label>
+                            <input type="text" name="name" class="form-control" placeholder="Ví dụ: Tiền điện, Tiền nước..." required />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Số tiền (VNĐ)</label>
+                            <input type="number" name="amount" class="form-control" placeholder="0" min="1" required />
+                        </div>
+                        <button type="submit" class="btn btn-gold w-100">
+                            <i class="bi bi-plus-circle me-1"></i> Thêm chi phí
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Expenses Table -->
+        <div class="col-md-8">
+            <div class="card-custom">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h6 class="mb-0 fw-semibold">Danh sách chi phí tháng @Model.Month/@Model.Year</h6>
+                    <span class="badge badge-gold">@Model.OtherExpenses.Count mục</span>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-custom mb-0">
+                        <thead>
+                            <tr>
+                                <th>Tên chi phí</th>
+                                <th class="text-end">Số tiền</th>
+                                <th class="text-center">Ngày tạo</th>
+                                <th class="text-end">Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (Model.OtherExpenses.Any())
+                            {
+                                @foreach (var ex in Model.OtherExpenses)
+                                {
+                                    <tr>
+                                        <td class="fw-medium">@ex.ExpenseName</td>
+                                        <td class="text-end text-danger fw-bold">@String.Format("{0:N0}đ", ex.Amount)</td>
+                                        <td class="text-center text-muted small">@ex.CreatedAt.ToString("dd/MM/yyyy")</td>
+                                        <td class="text-end">
+                                            <form asp-action="DeleteExpense" method="post" onsubmit="return confirm('Xóa khoản chi này?')">
+                                                <input type="hidden" name="id" value="@ex.ExpenseId" />
+                                                <button type="submit" class="btn btn-sm btn-link text-danger p-0 border-0">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                }
+                                <tr class="table-light">
+                                    <td class="fw-bold">TỔNG CỘNG</td>
+                                    <td class="text-end text-danger fw-bold">@String.Format("{0:N0}đ", Model.TotalOtherExpenses)</td>
+                                    <td colspan="2"></td>
+                                </tr>
+                            }
+                            else
+                            {
+                                <tr>
+                                    <td colspan="4" class="text-center py-4 text-muted">
+                                        Chưa có chi phí nào được ghi nhận trong tháng này.
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Optional: Custom JS for dynamic updates or validation
+    </script>
+}

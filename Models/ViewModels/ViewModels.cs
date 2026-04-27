@@ -8,7 +8,7 @@ public class CreateInvoiceViewModel
     public string? CustomerName { get; set; }
     public string? CustomerPhone { get; set; }
     public string PaymentMethod { get; set; } = "Tiền mặt";
-    public int PointsToUse { get; set; }
+    public decimal PointsToUse { get; set; }
     public string? Notes { get; set; }
     public List<InvoiceItemViewModel> Items { get; set; } = new List<InvoiceItemViewModel>();
 }
@@ -69,9 +69,15 @@ public class EmployeePayrollItem
     public decimal BaseSalaryEarned => ExcessDaysOff > 0
         ? Employee.BaseSalary / StandardWorkDays * ActualWorkDays
         : Employee.BaseSalary;
-    public decimal TotalInvoiceAmount { get; set; }
-    public decimal CommissionEarned => TotalInvoiceAmount * Employee.CommissionRate / 100;
-    public decimal TotalSalary => BaseSalaryEarned + CommissionEarned;
+
+    // Dictionary Key: CategoryId, Value: Total Amount
+    public Dictionary<int, decimal> CategoryTotals { get; set; } = new Dictionary<int, decimal>();
+    
+    // Dictionary Key: CategoryId, Value: Commission Earned
+    public Dictionary<int, decimal> CategoryCommissions { get; set; } = new Dictionary<int, decimal>();
+
+    public decimal TotalCommission => CategoryCommissions.Values.Sum();
+    public decimal TotalSalary => BaseSalaryEarned + TotalCommission;
     public string? AttendanceNotes { get; set; }
     public string? LateNotes { get; set; }
     public bool IsViolation => DaysOff > 2 || LateDays > 5;
@@ -92,4 +98,15 @@ public class EmployeeAttendanceItem
     public string? Notes { get; set; }
     public string? LateNotes { get; set; }
     public bool IsViolation => DaysOff > 2 || LateDays > 5;
+}
+
+public class ProfitReportViewModel
+{
+    public int Month { get; set; }
+    public int Year { get; set; }
+    public decimal TotalRevenue { get; set; }
+    public decimal TotalSalaries { get; set; }
+    public List<Expense> OtherExpenses { get; set; } = new List<Expense>();
+    public decimal TotalOtherExpenses => OtherExpenses.Sum(e => e.Amount);
+    public decimal NetProfit => TotalRevenue - TotalSalaries - TotalOtherExpenses;
 }

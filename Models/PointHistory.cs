@@ -10,7 +10,7 @@ public partial class PointHistory
 
     public int? InvoiceId { get; set; }
 
-    public int PointsChanged { get; set; }
+    public decimal PointsChanged { get; set; }
 
     public string? Description { get; set; }
 

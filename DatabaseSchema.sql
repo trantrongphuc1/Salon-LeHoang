@@ -112,3 +112,14 @@ BEGIN
     VALUES (N'Quản trị viên', 'admin', 'admin123', 'Admin', 0, 1, GETDATE());
 END
 GO
+
+-- Bảng Chi phí khác
+CREATE TABLE Expenses (
+    ExpenseId INT IDENTITY(1,1) PRIMARY KEY,
+    ExpenseName NVARCHAR(200) NOT NULL,
+    Amount DECIMAL(18, 2) NOT NULL,
+    Month INT NOT NULL,
+    Year INT NOT NULL,
+    CreatedAt DATETIME NOT NULL DEFAULT GETDATE()
+);
+GO

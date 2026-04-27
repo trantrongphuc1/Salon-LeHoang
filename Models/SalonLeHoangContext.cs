@@ -24,6 +24,9 @@ public partial class SalonLeHoangContext : DbContext
     public virtual DbSet<PointHistory> PointHistories { get; set; }
     public virtual DbSet<Service> Services { get; set; }
     public virtual DbSet<User> Users { get; set; }
+    public virtual DbSet<Expense> Expenses { get; set; }
+    public virtual DbSet<ServiceCategory> ServiceCategories { get; set; }
+    public virtual DbSet<EmployeeCommission> EmployeeCommissions { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -64,7 +67,7 @@ public partial class SalonLeHoangContext : DbContext
             entity.Property(e => e.PhoneNumber).HasMaxLength(20).IsUnicode(false);
             entity.Property(e => e.Position).HasMaxLength(100);
             entity.Property(e => e.BaseSalary).HasColumnType("decimal(18, 2)").HasDefaultValue(0m);
-            entity.Property(e => e.CommissionRate).HasColumnType("decimal(5, 2)").HasDefaultValue(3m);
+
             entity.Property(e => e.IsActive).HasDefaultValue(true);
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())").HasColumnType("datetime");
         });
@@ -75,8 +78,8 @@ public partial class SalonLeHoangContext : DbContext
             entity.Property(e => e.TotalAmount).HasColumnType("decimal(18, 2)");
             entity.Property(e => e.DiscountAmount).HasColumnType("decimal(18, 2)").HasDefaultValue(0m);
             entity.Property(e => e.FinalAmount).HasColumnType("decimal(18, 2)");
-            entity.Property(e => e.EarnedPoints).HasDefaultValue(0);
-            entity.Property(e => e.PointsUsed).HasDefaultValue(0);
+            entity.Property(e => e.EarnedPoints).HasColumnType("decimal(18, 2)").HasDefaultValue(0m);
+            entity.Property(e => e.PointsUsed).HasColumnType("decimal(18, 2)").HasDefaultValue(0m);
             entity.Property(e => e.PaymentMethod).HasMaxLength(50).HasDefaultValue("Tiền mặt");
             entity.Property(e => e.PaymentDate).HasDefaultValueSql("(getdate())").HasColumnType("datetime");
             entity.HasOne(d => d.Customer).WithMany(p => p.Invoices)
@@ -99,6 +102,7 @@ public partial class SalonLeHoangContext : DbContext
         modelBuilder.Entity<PointHistory>(entity =>
         {
             entity.HasKey(e => e.HistoryId);
+            entity.Property(e => e.PointsChanged).HasColumnType("decimal(18, 2)");
             entity.Property(e => e.Description).HasMaxLength(255);
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())").HasColumnType("datetime");
             entity.HasOne(d => d.User).WithMany(p => p.PointHistories)
@@ -116,6 +120,14 @@ public partial class SalonLeHoangContext : DbContext
             entity.Property(e => e.IsActive).HasDefaultValue(true);
             entity.Property(e => e.Price).HasColumnType("decimal(18, 2)");
             entity.Property(e => e.ServiceName).HasMaxLength(100);
+            entity.HasOne(d => d.Category).WithMany(p => p.Services)
+                .HasForeignKey(d => d.CategoryId).OnDelete(DeleteBehavior.SetNull);
+        });
+
+        modelBuilder.Entity<ServiceCategory>(entity =>
+        {
+            entity.HasKey(e => e.CategoryId);
+            entity.Property(e => e.CategoryName).HasMaxLength(100);
         });
 
         modelBuilder.Entity<User>(entity =>
@@ -127,7 +139,28 @@ public partial class SalonLeHoangContext : DbContext
             entity.Property(e => e.IsActive).HasDefaultValue(true);
             entity.Property(e => e.PasswordHash).HasMaxLength(255);
             entity.Property(e => e.PhoneNumber).HasMaxLength(20).IsUnicode(false);
+            entity.Property(e => e.Points).HasColumnType("decimal(18, 2)").HasDefaultValue(0m);
             entity.Property(e => e.Role).HasMaxLength(20).IsUnicode(false).HasDefaultValue("Customer");
+        });
+
+        modelBuilder.Entity<Expense>(entity =>
+        {
+            entity.HasKey(e => e.ExpenseId);
+            entity.Property(e => e.Amount).HasColumnType("decimal(18, 2)");
+            entity.Property(e => e.ExpenseName).HasMaxLength(200);
+            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())").HasColumnType("datetime");
+        });
+
+        modelBuilder.Entity<EmployeeCommission>(entity =>
+        {
+            entity.HasKey(e => new { e.EmployeeId, e.CategoryId });
+            entity.Property(e => e.CommissionRate).HasColumnType("decimal(5, 2)").HasDefaultValue(0m);
+            
+            entity.HasOne(d => d.Employee).WithMany(p => p.CategoryCommissions)
+                .HasForeignKey(d => d.EmployeeId).OnDelete(DeleteBehavior.Cascade);
+            
+            entity.HasOne(d => d.Category).WithMany()
+                .HasForeignKey(d => d.CategoryId).OnDelete(DeleteBehavior.Cascade);
         });
 
         OnModelCreatingPartial(modelBuilder);

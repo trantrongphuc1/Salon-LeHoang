@@ -348,10 +348,10 @@ function calcTotal(){
     var o=orders[currentOrder];
     var total=o.items.reduce((s,i)=>s+i.price*i.qty,0);
     var ptsInput=document.getElementById('pointsUse');
-    var pts=parseInt(ptsInput.value)||0;
-    var maxPts=o.customerPoints||0;
+    var pts=parseFloat(ptsInput.value)||0;
+    var maxPts=parseFloat(o.customerPoints)||0;
     if(pts>maxPts){ pts=maxPts; ptsInput.value=pts; }
-    var disc=pts*1000;if(disc>total)disc=total;
+    var disc=pts;if(disc>total)disc=total;
     var final_=total-disc;
     document.getElementById('totalAmount').textContent=total.toLocaleString('vi-VN')+'đ';
     document.getElementById('finalAmount').textContent=final_.toLocaleString('vi-VN')+'đ';
@@ -397,7 +397,7 @@ document.getElementById('custSearch').addEventListener('input',function(){
             var el=document.getElementById('custResults');
             if(!data.length){el.classList.remove('show');document.getElementById('custNotFound').style.display='block';document.getElementById('newCustPhone').value=q.match(/\d/)?q:'';document.getElementById('newCustName').value=q.match(/\d/)?'':q;return;}
             document.getElementById('custNotFound').style.display='none';
-            el.innerHTML=data.map(c=>`<div class="cust-item" onclick="selectCustomer(${c.userId},'${c.fullName.replace(/'/g,"\\'")}','${c.phoneNumber}',${c.points})">${c.fullName} <span class="text-muted">— ${c.phoneNumber}</span> <span style="color:var(--gold);float:right;">★${c.points}</span></div>`).join('');
+            el.innerHTML=data.map(c=>`<div class="cust-item" onclick="selectCustomer(${c.userId},'${c.fullName.replace(/'/g,"\\'")}','${c.phoneNumber}',${c.points})">${c.fullName} <span class="text-muted">— ${c.phoneNumber}</span> <span style="color:var(--gold);float:right;">★${Math.round(c.points).toLocaleString('vi-VN')}</span></div>`).join('');
             el.classList.add('show');
         });
     },300);
@@ -407,8 +407,8 @@ function selectCustomer(id,name,phone,pts){
     var o=orders[currentOrder];o.customerId=id;o.customerName=name;o.customerPhone=phone;o.customerPoints=pts;
     document.getElementById('custSearch').value='';document.getElementById('custResults').classList.remove('show');
     document.getElementById('custSelected').style.display='block';document.getElementById('custNotFound').style.display='none';
-    document.getElementById('custName').textContent=name;document.getElementById('custPhone').textContent=phone;document.getElementById('custPoints').textContent=pts;
-    document.getElementById('pointsUse').max=pts;calcTotal();
+    document.getElementById('custName').textContent=name;document.getElementById('custPhone').textContent=phone;document.getElementById('custPoints').textContent=Math.round(pts).toLocaleString('vi-VN');
+    document.getElementById('pointsUse').max=Math.round(pts);calcTotal();
     saveOrders();
 }
 
@@ -474,7 +474,7 @@ function doCheckout(){
         if(d.success){
             document.getElementById('modalAmount').textContent=d.finalAmount.toLocaleString('vi-VN')+'đ';
             document.getElementById('modalInvoiceId').textContent='#'+d.invoiceId;
-            document.getElementById('modalPoints').textContent='+'+d.earnedPoints;
+            document.getElementById('modalPoints').textContent='+'+Math.round(d.earnedPoints).toLocaleString('vi-VN');
             document.getElementById('modalPrintBtn').href='/Invoice/Print/'+d.invoiceId;
             window._paidOrderIdx=currentOrder;
             new bootstrap.Modal(document.getElementById('successModal')).show();
