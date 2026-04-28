@@ -208,8 +208,29 @@ namespace Salon_LeHoang.Controllers
         }
 
         // Bảng lương
-        public async Task<IActionResult> Payroll(int? month, int? year)
+        public async Task<IActionResult> Payroll(int? month, int? year, string? pwd)
         {
+            if (!string.IsNullOrEmpty(pwd))
+            {
+                if (pwd == "cucvahoang")
+                {
+                    Response.Cookies.Append("Level2Auth", "true", new CookieOptions { Expires = DateTimeOffset.UtcNow.AddHours(4) });
+                }
+                else
+                {
+                    TempData["Error"] = "Mật khẩu cấp 2 không đúng!";
+                    return RedirectToAction("Index", "Admin");
+                }
+            }
+            else
+            {
+                if (Request.Cookies["Level2Auth"] != "true")
+                {
+                    TempData["Error"] = "Vui lòng nhập mật khẩu cấp 2 để xem bảng lương!";
+                    return RedirectToAction("Index", "Admin");
+                }
+            }
+
             var m = month ?? DateTime.Now.Month;
             var y = year ?? DateTime.Now.Year;
 
@@ -279,6 +300,12 @@ namespace Salon_LeHoang.Controllers
         // Chi tiết lương 1 nhân viên
         public async Task<IActionResult> PayrollDetail(int employeeId, int? month, int? year)
         {
+            if (Request.Cookies["Level2Auth"] != "true")
+            {
+                TempData["Error"] = "Vui lòng nhập mật khẩu cấp 2 để xem bảng lương!";
+                return RedirectToAction("Index", "Admin");
+            }
+
             var m = month ?? DateTime.Now.Month;
             var y = year ?? DateTime.Now.Year;
 

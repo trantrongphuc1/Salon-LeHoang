@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("Salon LeHoang")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+51d1ae2cca515b50af0f410377cbf8cecf7f9a2e")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+4d6ae0b205f9e8f44d8f7498345fc591b8128ccb")]
 [assembly: System.Reflection.AssemblyProductAttribute("Salon LeHoang")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Salon LeHoang")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

@@ -284,3 +284,6 @@ D:\Salon-LeHoang\bin\Debug\net8.0\publish\Salon LeHoang.deps.json
 D:\Salon-LeHoang\bin\Debug\net8.0\publish\Salon LeHoang.runtimeconfig.json
 D:\Salon-LeHoang\bin\Debug\net8.0\publish\Salon LeHoang.staticwebassets.endpoints.json
 D:\Salon-LeHoang\bin\Debug\net8.0\ssm_input.json
+D:\Salon-LeHoang\bin\Debug\net8.0\deploy_params.json
+D:\Salon-LeHoang\bin\Debug\net8.0\publish\ssm_input.json
+D:\Salon-LeHoang\bin\Debug\net8.0\publish\deploy_params.json

@@ -441,7 +441,7 @@
                         <i class="bi bi-calendar-check-fill"></i> Chấm công
                     </a>
                     <a class="sidebar-link @(ViewContext.RouteData.Values["action"]?.ToString() == "Payroll" ? "active" : "")"
-                       asp-controller="Employee" asp-action="Payroll">
+                       href="javascript:void(0)" onclick="accessPayroll()">
                         <i class="bi bi-cash-stack"></i> Bảng lương
                     </a>
                     <a class="sidebar-link @(ViewContext.RouteData.Values["action"]?.ToString() == "ProfitReport" ? "active" : "")"
@@ -619,6 +619,12 @@
             if (level2PasswordCallback) {
                 level2PasswordCallback(pwd);
             }
+        }
+
+        function accessPayroll() {
+            requireLevel2Password("Vui lòng nhập mật khẩu cấp 2 để xem bảng lương:", function(pwd) {
+                window.location.href = '@Url.Action("Payroll", "Employee")?pwd=' + encodeURIComponent(pwd);
+            });
         }
     </script>
     @await RenderSectionAsync("Scripts", required: false)

@@ -1,0 +1,17 @@
+{
+    "InstanceIds": [
+        "i-0c65bd4bb14691390"
+    ],
+    "DocumentName": "AWS-RunPowerShellScript",
+    "Parameters": {
+        "commands": [
+            "$ProgressPreference = 'SilentlyContinue'",
+            "Invoke-WebRequest -Uri 'https://salon-lehoang-deploy-639129711425259668.s3.ap-southeast-1.amazonaws.com/publish.zip?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIASHSURO5O3ITF4R2K%2F20260428%2Fap-southeast-1%2Fs3%2Faws4_request&X-Amz-Date=20260428T163718Z&X-Amz-Expires=3600&X-Amz-SignedHeaders=host&X-Amz-Signature=d75d0b4ffd849a750824aa1cf03bad4259f62424c23d6e327172f0507fda9b40' -OutFile 'C:\\publish.zip'",
+            "Remove-Item -Path 'C:\\inetpub\\wwwroot\\*' -Recurse -Force",
+            "Expand-Archive -Path 'C:\\publish.zip' -DestinationPath 'C:\\inetpub\\wwwroot' -Force",
+            "icacls 'C:\\inetpub\\wwwroot' /grant 'IIS AppPool\\DefaultAppPool:(OI)(CI)RX'",
+            "icacls 'C:\\inetpub\\wwwroot' /grant 'NT AUTHORITY\\SYSTEM:(OI)(CI)F'",
+            "iisreset"
+        ]
+    }
+}

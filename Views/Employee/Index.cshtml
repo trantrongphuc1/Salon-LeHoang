@@ -18,7 +18,6 @@
                         <th>Họ tên</th>
                         <th>SĐT</th>
                         <th>Vị trí</th>
-                        <th>Lương cơ bản</th>
                         <th>Hoa hồng (%)</th>
                         <th>Trạng thái</th>
                         <th class="text-end">Hành động</th>
@@ -34,7 +33,6 @@
                             </td>
                             <td>@(e.PhoneNumber ?? "—")</td>
                             <td>@(e.Position ?? "—")</td>
-                            <td class="fw-bold" style="color:var(--gold);">@String.Format("{0:N0}đ", e.BaseSalary)</td>
                              <td>
                                 <div class="d-flex flex-wrap gap-1" style="max-width: 200px;">
                                     @foreach (var comm in e.CategoryCommissions.OrderBy(c => c.Category.CategoryName))
