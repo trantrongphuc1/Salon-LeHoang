@@ -78,8 +78,14 @@ namespace Salon_LeHoang.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        public async Task<IActionResult> Edit(int id)
+        public async Task<IActionResult> Edit(int id, string? pwd)
         {
+            if (pwd != "cucvahoang")
+            {
+                TempData["Error"] = "Mật khẩu cấp 2 không đúng!";
+                return RedirectToAction(nameof(Index));
+            }
+
             var employee = await _context.Employees
                 .Include(e => e.CategoryCommissions)
                 .FirstOrDefaultAsync(e => e.EmployeeId == id);

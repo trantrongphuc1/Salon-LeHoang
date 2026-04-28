@@ -508,6 +508,29 @@
         </div>
     </div>
 
+    <!-- Level 2 Password Modal -->
+    <div class="modal fade" id="level2PasswordModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-sm">
+            <div class="modal-content border-0 shadow-lg" style="border-radius: 12px;">
+                <div class="modal-header border-0 pb-0">
+                    <h5 class="modal-title fw-bold" id="level2PasswordTitle"><i class="bi bi-shield-lock-fill text-warning me-2"></i>Xác thực bảo mật</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="text-muted small mb-3" id="level2PasswordMessage">Vui lòng nhập mật khẩu cấp 2 để tiếp tục.</p>
+                    <div class="input-group mb-2">
+                        <input type="password" class="form-control" id="level2PasswordInput" placeholder="Mật khẩu cấp 2" autocomplete="new-password">
+                        <button class="btn btn-outline-secondary bg-light" type="button" id="toggleLevel2Password" style="border-color: var(--border-color);">
+                            <i class="bi bi-eye-slash text-muted" id="toggleLevel2PasswordIcon"></i>
+                        </button>
+                    </div>
+                    <div id="level2PasswordError" class="text-danger small mb-3 d-none"></div>
+                    <button type="button" class="btn btn-gold w-100" id="btnSubmitLevel2Password">Xác nhận</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script>
@@ -524,6 +547,79 @@
                 setTimeout(() => a.remove(), 500);
             });
         }, 5000);
+
+        // Global Level 2 Password Logic
+        let level2PasswordCallback = null;
+
+        function requireLevel2Password(message, callback) {
+            if (message) {
+                document.getElementById('level2PasswordMessage').innerText = message;
+            } else {
+                document.getElementById('level2PasswordMessage').innerText = "Vui lòng nhập mật khẩu cấp 2 để tiếp tục.";
+            }
+            document.getElementById('level2PasswordInput').value = '';
+            document.getElementById('level2PasswordError').classList.add('d-none');
+            
+            const input = document.getElementById('level2PasswordInput');
+            const icon = document.getElementById('toggleLevel2PasswordIcon');
+            input.type = 'password';
+            icon.classList.remove('bi-eye');
+            icon.classList.add('bi-eye-slash');
+
+            level2PasswordCallback = callback;
+            var myModal = new bootstrap.Modal(document.getElementById('level2PasswordModal'));
+            myModal.show();
+            
+            document.getElementById('level2PasswordModal').addEventListener('shown.bs.modal', function () {
+                document.getElementById('level2PasswordInput').focus();
+            }, { once: true });
+        }
+
+        document.getElementById('toggleLevel2Password').addEventListener('click', function() {
+            const input = document.getElementById('level2PasswordInput');
+            const icon = document.getElementById('toggleLevel2PasswordIcon');
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.remove('bi-eye-slash');
+                icon.classList.add('bi-eye');
+            } else {
+                input.type = 'password';
+                icon.classList.remove('bi-eye');
+                icon.classList.add('bi-eye-slash');
+            }
+        });
+
+        document.getElementById('btnSubmitLevel2Password').addEventListener('click', function() {
+            submitLevel2Password();
+        });
+
+        document.getElementById('level2PasswordInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                submitLevel2Password();
+            }
+        });
+
+        function submitLevel2Password() {
+            const pwd = document.getElementById('level2PasswordInput').value;
+            if (!pwd) {
+                document.getElementById('level2PasswordError').innerText = "Vui lòng nhập mật khẩu!";
+                document.getElementById('level2PasswordError').classList.remove('d-none');
+                return;
+            }
+            if (pwd !== "cucvahoang") {
+                document.getElementById('level2PasswordError').innerText = "Mật khẩu cấp 2 không đúng!";
+                document.getElementById('level2PasswordError').classList.remove('d-none');
+                return;
+            }
+            
+            var myModalEl = document.getElementById('level2PasswordModal');
+            var modal = bootstrap.Modal.getInstance(myModalEl);
+            modal.hide();
+            
+            if (level2PasswordCallback) {
+                level2PasswordCallback(pwd);
+            }
+        }
     </script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>

@@ -8,7 +8,14 @@
             <a asp-action="Index" class="btn btn-sm btn-outline-secondary"><i class="bi bi-arrow-left"></i></a>
             <h4 class="fw-bold mb-0">Hóa đơn #@Model.InvoiceId</h4>
         </div>
-        <a asp-action="Print" asp-route-id="@Model.InvoiceId" target="_blank" class="btn btn-outline-gold"><i class="bi bi-printer me-1"></i> In</a>
+        <div class="d-flex gap-2">
+            <form asp-action="Delete" method="post" class="d-inline" id="deleteForm-@Model.InvoiceId">
+                <input type="hidden" name="id" value="@Model.InvoiceId" />
+                <input type="hidden" name="pwd" id="pwd-@Model.InvoiceId" />
+                <button type="button" class="btn btn-outline-danger" onclick="deleteInvoice(@Model.InvoiceId)"><i class="bi bi-trash me-1"></i> Xóa</button>
+            </form>
+            <a asp-action="Print" asp-route-id="@Model.InvoiceId" target="_blank" class="btn btn-outline-gold"><i class="bi bi-printer me-1"></i> In</a>
+        </div>
     </div>
     <div class="row g-4">
         <div class="col-md-4">
@@ -47,3 +54,14 @@
         </div>
     </div>
 </div>
+
+@section Scripts {
+    <script>
+        function deleteInvoice(id) {
+            requireLevel2Password("Vui lòng nhập mật khẩu cấp 2 để xóa hóa đơn:", function(pwd) {
+                document.getElementById('pwd-' + id).value = pwd;
+                document.getElementById('deleteForm-' + id).submit();
+            });
+        }
+    </script>
+}

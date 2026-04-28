@@ -46,7 +46,7 @@
                     </div>
                 </div>
                 <div class="mt-4">
-                    <a asp-action="Edit" asp-route-id="@Model.EmployeeId" class="btn btn-sm btn-outline-gold w-100">Chỉnh sửa thông tin</a>
+                    <a href="javascript:void(0)" onclick="editEmployee(@Model.EmployeeId)" class="btn btn-sm btn-outline-gold w-100">Chỉnh sửa thông tin</a>
                 </div>
             </div>
         </div>
@@ -90,3 +90,13 @@
         </div>
     </div>
 </div>
+
+@section Scripts {
+    <script>
+        function editEmployee(id) {
+            requireLevel2Password("Vui lòng nhập mật khẩu cấp 2 để sửa thông tin nhân viên:", function(pwd) {
+                window.location.href = '@Url.Action("Edit")/' + id + '?pwd=' + encodeURIComponent(pwd);
+            });
+        }
+    </script>
+}

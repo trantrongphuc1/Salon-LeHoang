@@ -1,0 +1,18 @@
+{
+    "Parameters":  {
+                       "commands":  [
+                                        "$ProgressPreference = \u0027SilentlyContinue\u0027",
+                                        "Invoke-WebRequest -Uri \u0027https://salon-lehoang-deploy-639129711425259668.s3.ap-southeast-1.amazonaws.com/publish.zip?X-Amz-Algorithm=AWS4-HMAC-SHA256\u0026X-Amz-Credential=AKIASHSURO5O3ITF4R2K%2F20260428%2Fap-southeast-1%2Fs3%2Faws4_request\u0026X-Amz-Date=20260428T045653Z\u0026X-Amz-Expires=3600\u0026X-Amz-SignedHeaders=host\u0026X-Amz-Signature=1dc3daf21635dcd047f9f8dacfef7158dc85333d1005cc80c8e985ce4e070997\u0027 -OutFile \u0027C:\\publish.zip\u0027",
+                                        "Stop-Service -Name W3SVC",
+                                        "Remove-Item -Recurse -Force C:\\inetpub\\wwwroot\\*",
+                                        "Expand-Archive C:\\publish.zip -DestinationPath C:\\inetpub\\wwwroot -Force",
+                                        "Import-Module WebAdministration",
+                                        "Set-ItemProperty IIS:\\AppPools\\DefaultAppPool -Name processModel.identityType -Value LocalSystem",
+                                        "Start-Service -Name W3SVC"
+                                    ]
+                   },
+    "DocumentName":  "AWS-RunPowerShellScript",
+    "InstanceIds":  [
+                        "i-0c65bd4bb14691390"
+                    ]
+}

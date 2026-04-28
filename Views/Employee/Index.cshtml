@@ -50,7 +50,7 @@
                                 else { <span class="badge bg-secondary">Nghỉ</span> }
                             </td>
                             <td class="text-end text-nowrap">
-                                <a asp-action="Edit" asp-route-id="@e.EmployeeId" class="btn btn-sm btn-outline-gold"><i class="bi bi-pencil"></i></a>
+                                <a href="javascript:void(0)" onclick="editEmployee(@e.EmployeeId)" class="btn btn-sm btn-outline-gold"><i class="bi bi-pencil"></i></a>
                                 <form asp-action="ToggleActive" method="post" class="d-inline">
                                     <input type="hidden" name="id" value="@e.EmployeeId" />
                                     <button type="submit" class="btn btn-sm @(e.IsActive ? "btn-outline-secondary" : "btn-outline-success")">
@@ -69,3 +69,13 @@
         </div>
     </div>
 </div>
+
+@section Scripts {
+    <script>
+        function editEmployee(id) {
+            requireLevel2Password("Vui lòng nhập mật khẩu cấp 2 để sửa thông tin nhân viên:", function(pwd) {
+                window.location.href = '@Url.Action("Edit")/' + id + '?pwd=' + encodeURIComponent(pwd);
+            });
+        }
+    </script>
+}

@@ -74,8 +74,13 @@
                             <td class="text-success">+@inv.EarnedPoints</td>
                             <td class="text-muted">@inv.PaymentDate.ToString("dd/MM HH:mm")</td>
                             <td class="text-end text-nowrap">
-                                <a asp-action="Details" asp-route-id="@inv.InvoiceId" class="btn btn-sm btn-outline-info"><i class="bi bi-eye"></i></a>
-                                <a asp-action="Print" asp-route-id="@inv.InvoiceId" class="btn btn-sm btn-outline-gold" target="_blank"><i class="bi bi-printer"></i></a>
+                                <a asp-action="Details" asp-route-id="@inv.InvoiceId" class="btn btn-sm btn-outline-info" title="Chi tiết"><i class="bi bi-eye"></i></a>
+                                <a asp-action="Print" asp-route-id="@inv.InvoiceId" class="btn btn-sm btn-outline-gold" target="_blank" title="In"><i class="bi bi-printer"></i></a>
+                                <form asp-action="Delete" method="post" class="d-inline" id="deleteForm-@inv.InvoiceId">
+                                    <input type="hidden" name="id" value="@inv.InvoiceId" />
+                                    <input type="hidden" name="pwd" id="pwd-@inv.InvoiceId" />
+                                    <button type="button" class="btn btn-sm btn-outline-danger" onclick="deleteInvoice(@inv.InvoiceId)" title="Xóa"><i class="bi bi-trash"></i></button>
+                                </form>
                             </td>
                         </tr>
                     }
@@ -88,3 +93,14 @@
         </div>
     </div>
 </div>
+
+@section Scripts {
+    <script>
+        function deleteInvoice(id) {
+            requireLevel2Password("Vui lòng nhập mật khẩu cấp 2 để xóa hóa đơn:", function(pwd) {
+                document.getElementById('pwd-' + id).value = pwd;
+                document.getElementById('deleteForm-' + id).submit();
+            });
+        }
+    </script>
+}

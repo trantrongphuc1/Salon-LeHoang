@@ -1,0 +1,113 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'CloudFormation Template for Salon-LeHoang: Windows Server with SQL Server Express and IIS/.NET Core Hosting Bundle'
+
+Parameters:
+  InstanceType:
+    Description: >
+      EC2 Instance Type. 
+      Note: Your AWS account seems restricted to Free Tier instances only. 
+      t3.micro (1GB RAM) is the maximum allowed. Warning: Windows Server + SQL Server on 1GB RAM will be EXTREMELY slow.
+    Type: String
+    Default: t3.micro
+    AllowedValues:
+      - t2.micro
+      - t3.micro
+      - t3.small
+      - t3.medium
+      - t3.large
+      - t3a.small
+      - t3a.medium
+      - t3a.large
+  KeyName:
+    Description: Name of an existing EC2 KeyPair to enable RDP (Remote Desktop) access to the instance. You must create this in AWS Console first.
+    Type: AWS::EC2::KeyPair::KeyName
+    ConstraintDescription: must be the name of an existing EC2 Key Pair.
+
+Resources:
+  SalonInstanceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: [ec2.amazonaws.com]
+            Action: ["sts:AssumeRole"]
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore
+  SalonInstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      Roles:
+        - !Ref SalonInstanceRole
+
+  SalonSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Allow HTTP, HTTPS, and RDP
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+          Description: "Allow HTTP traffic"
+        - IpProtocol: tcp
+          FromPort: 443
+          ToPort: 443
+          CidrIp: 0.0.0.0/0
+          Description: "Allow HTTPS traffic"
+        - IpProtocol: tcp
+          FromPort: 3389
+          ToPort: 3389
+          CidrIp: 0.0.0.0/0
+          Description: "Allow Remote Desktop Protocol (RDP)"
+          
+  SalonEC2Instance:
+    Type: AWS::EC2::Instance
+    Properties:
+      InstanceType: !Ref InstanceType
+      KeyName: !Ref KeyName
+      IamInstanceProfile: !Ref SalonInstanceProfile
+      # Using AWS Systems Manager Parameter Store to get the latest Windows Server 2022 + SQL 2022 Express AMI dynamically
+      ImageId: '{{resolve:ssm:/aws/service/ami-windows-latest/Windows_Server-2022-English-Full-SQL_2022_Express}}'
+      SecurityGroups:
+        - !Ref SalonSecurityGroup
+      BlockDeviceMappings:
+        - DeviceName: /dev/sda1
+          Ebs:
+            VolumeSize: 80
+            VolumeType: gp3
+            Encrypted: true
+      UserData: 
+        Fn::Base64: !Sub |
+          <powershell>
+          # 1. Install IIS (Internet Information Services)
+          Install-WindowsFeature -name Web-Server -IncludeManagementTools
+
+          # 2. Install Chocolatey package manager to easily install .NET
+          Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
+
+          # 3. Install .NET 8 Hosting Bundle (Required to host ASP.NET Core apps on IIS)
+          # You can change to dotnet-9.0-windowshosting if your source is .NET 9
+          choco install dotnet-8.0-windowshosting -y
+
+          # 4. Enable IIS to start automatically and restart it to pick up the Hosting Bundle module
+          Set-Service -Name W3SVC -StartupType Automatic
+          Start-Service -Name W3SVC
+          iisreset
+
+          # 5. Allow IIS through Windows Firewall
+          Enable-NetFirewallRule -DisplayGroup "World Wide Web Services (HTTP)"
+          Enable-NetFirewallRule -DisplayGroup "World Wide Web Services (HTTPS)"
+
+          Write-Host "Server Initialization Completed"
+          </powershell>
+
+Outputs:
+  PublicIP:
+    Description: Public IP address of the Windows Server. Use this to access your website and to connect via RDP.
+    Value: !GetAtt SalonEC2Instance.PublicIp
+  PublicDNS:
+    Description: Public DNS of the Windows Server.
+    Value: !GetAtt SalonEC2Instance.PublicDnsName

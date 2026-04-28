@@ -201,6 +201,53 @@ namespace Salon_LeHoang.Controllers
             return View(invoice);
         }
 
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Delete(int id, string pwd)
+        {
+            if (pwd != "cucvahoang")
+            {
+                TempData["Error"] = "Mật khẩu cấp 2 không đúng!";
+                return RedirectToAction(nameof(Index));
+            }
+
+            var invoice = await _context.Invoices
+                .Include(i => i.InvoiceDetails)
+                .Include(i => i.Customer)
+                .FirstOrDefaultAsync(i => i.InvoiceId == id);
+
+            if (invoice == null)
+            {
+                TempData["Error"] = "Không tìm thấy hóa đơn!";
+                return RedirectToAction(nameof(Index));
+            }
+
+            // Rollback points
+            if (invoice.PointsUsed > 0)
+            {
+                invoice.Customer.Points += invoice.PointsUsed;
+            }
+            if (invoice.EarnedPoints > 0)
+            {
+                invoice.Customer.Points -= invoice.EarnedPoints;
+            }
+
+            // Remove point histories related to this invoice
+            var pointHistories = await _context.PointHistories.Where(ph => ph.InvoiceId == id).ToListAsync();
+            if (pointHistories.Any())
+            {
+                _context.PointHistories.RemoveRange(pointHistories);
+            }
+
+            _context.InvoiceDetails.RemoveRange(invoice.InvoiceDetails);
+            _context.Invoices.Remove(invoice);
+
+            await _context.SaveChangesAsync();
+
+            TempData["Success"] = "Xóa hóa đơn thành công!";
+            return RedirectToAction(nameof(Index));
+        }
+
         // API: Lấy thông tin khách hàng (dùng cho AJAX)
         [HttpGet]
         public async Task<IActionResult> GetCustomerInfo(int id)

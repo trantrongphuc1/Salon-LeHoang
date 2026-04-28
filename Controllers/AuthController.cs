@@ -17,7 +17,7 @@ namespace Salon_LeHoang.Controllers
         [HttpGet]
         public IActionResult Login()
         {
-            if (User.Identity.IsAuthenticated)
+            if (User.Identity?.IsAuthenticated == true)
             {
                 if (User.IsInRole("Admin")) return RedirectToAction("Index", "Pos");
                 // Khách hàng không có quyền truy cập hệ thống

@@ -277,3 +277,10 @@ D:\Salon-LeHoang\obj\Debug\net8.0\Salon LeHoang.pdb
 D:\Salon-LeHoang\obj\Debug\net8.0\Salon LeHoang.genruntimeconfig.cache
 D:\Salon-LeHoang\obj\Debug\net8.0\ref\Salon LeHoang.dll
 D:\Salon LeHoang\Salon LeHoang\obj\Debug\net8.0\Salon LeHoang.sourcelink.json
+D:\Salon-LeHoang\bin\Debug\net8.0\publish\web.config
+D:\Salon-LeHoang\bin\Debug\net8.0\publish\appsettings.Development.json
+D:\Salon-LeHoang\bin\Debug\net8.0\publish\appsettings.json
+D:\Salon-LeHoang\bin\Debug\net8.0\publish\Salon LeHoang.deps.json
+D:\Salon-LeHoang\bin\Debug\net8.0\publish\Salon LeHoang.runtimeconfig.json
+D:\Salon-LeHoang\bin\Debug\net8.0\publish\Salon LeHoang.staticwebassets.endpoints.json
+D:\Salon-LeHoang\bin\Debug\net8.0\ssm_input.json

@@ -1,7 +1,7 @@
 @model IEnumerable<Salon_LeHoang.Models.Service>
 @{
     var category = ViewBag.Category as Salon_LeHoang.Models.ServiceCategory;
-    ViewData["Title"] = "Quản lý dịch vụ - " + category.CategoryName;
+    ViewData["Title"] = "Quản lý dịch vụ - " + category?.CategoryName;
 }
 
 <div class="animate-in">
@@ -9,13 +9,13 @@
         <a asp-action="Index" class="btn btn-sm btn-outline-secondary"><i class="bi bi-arrow-left"></i></a>
         <div>
             <h4 class="fw-bold mb-0">Thêm dịch vụ vào danh mục</h4>
-            <span class="badge badge-gold fs-6">@category.CategoryName</span>
+            <span class="badge badge-gold fs-6">@category?.CategoryName</span>
         </div>
     </div>
 
     <div class="card-custom">
         <form asp-action="ManageServices" method="post">
-            <input type="hidden" name="categoryId" value="@category.CategoryId" />
+            <input type="hidden" name="categoryId" value="@category?.CategoryId" />
             
             <div class="p-4 border-bottom bg-light d-flex justify-content-between align-items-center">
                 <div class="small text-muted">
@@ -41,7 +41,7 @@
                     <tbody>
                         @foreach (var s in Model)
                         {
-                            var isInCategory = s.CategoryId == category.CategoryId;
+                            var isInCategory = s.CategoryId == category?.CategoryId;
                             <tr class="@(isInCategory ? "table-active" : "")">
                                 <td class="text-center">
                                     <div class="form-check d-flex justify-content-center">
@@ -54,13 +54,13 @@
                                 <td><small class="text-muted">@s.ServiceCode</small></td>
                                 <td class="fw-bold" style="color:var(--gold);">@String.Format("{0:N0}đ", s.Price)</td>
                                 <td>
-                                    @if (s.CategoryId == category.CategoryId)
+                                    @if (s.CategoryId == category?.CategoryId)
                                     {
                                         <span class="badge badge-gold">Đang chọn</span>
                                     }
                                     else if (s.CategoryId != null)
                                     {
-                                        <span class="badge bg-secondary">@s.Category.CategoryName</span>
+                                        <span class="badge bg-secondary">@s.Category?.CategoryName</span>
                                     }
                                     else
                                     {
